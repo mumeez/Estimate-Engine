@@ -1,0 +1,146 @@
+#+TITLE: Estimate Engine — Project Notes
+#+DATE: 2026-06-13
+#+FILETAGS: :estimate-engine:construction:webapp:javascript:
+#+REPO: https://github.com/mumeez/estimate-engine
+
+* Overview
+
+Construction & remodel estimating web app with eldritch-themed UI,
+canvas particle background, Home Depot pricing database, and California
+building code search. Runs entirely in the browser — no backend needed.
+
+** Quick Start
+
+#+BEGIN_SRC sh
+cd ~/Projects/estimate-app && python3 -m http.server 8080
+#+END_SRC
+
+Then open http://localhost:8080.
+
+** Repo
+
+https://github.com/mumeez/estimate-engine
+
+* Current Features
+
+** Core Engine
+- Materials database: 200+ items / 14 categories w/ Home Depot pricing
+- Auto-fill materials by search
+- Hourly rate slider ($15–$250/hr)
+- Tax toggle, material markup %, discount %
+- Simple / Advanced mode toggle
+
+** Advanced Mode
+- Overhead %, profit margin %
+- Subcontractors w/ license tracking
+- Equipment costs, permits/fees
+- Waste factor, per-item markup, labor categories
+
+** Quick Calculators
+- Drywall, Concrete, Lumber, Paint, Flooring
+- All can auto-add results to estimate
+
+** Project Management
+- Notes, status (Estimating → In Progress → Completed → On Hold)
+- Crew size, start/end dates
+- Change orders w/ status toggle
+- Save/load to localStorage
+
+** Code Search
+- 78 CA building code refs: CRC, CBC, CALGreen, CEBC, CPC, CMC, CEC
+
+** Export
+- Obsidian Markdown (full project note w/ YAML frontmatter)
+- Print / PDF via browser
+
+** UI / Theme
+- Dark eldritch palette (Dracula-inspired)
+  - Background: #363748 (deep), #404262 (surface)
+  - Headers: #BC93FA (purple)
+  - Text: #33ff66 (green)
+- Font: CaskaydiaCove Nerd Font
+- Canvas particle background (stars, connector lines, drifting glyphs)
+- NO CSS text animations — only background moves
+
+* Development History
+
+** Session 1 — Initial Build
+- Created project scaffold at ~/Projects/estimate-app/
+- Built index.html (two-panel layout), styles.css (Dracula eldritch theme),
+  app.js (full estimate engine)
+- Created data/materials.json (200+ items) and data/ca-codes.json (78 refs)
+- Created obsidian-template.md
+
+** Session 2 — Background Animation & Calculators
+- Added ParticleBackground class (canvas stars, particles, glyphs)
+- Added 5 quick calculators (drywall, concrete, lumber, paint, flooring)
+- Added project notes, status dropdown, crew & timeline
+- Added change orders with status toggle
+- Added Obsidian markdown export
+
+** Session 3 — Color & Font Theming
+- Changed backgrounds to #282A36 / #21222C (Dracula)
+- Changed headers to #BC93FA (purple)
+- Removed float animation from card headers
+- Renamed app to "Estimate Engine"
+- Changed font to CaskaydiaCove Nerd Font
+- Removed all CSS text animations
+
+** Session 4 — Color Iteration & Canvas Fix
+- Fixed canvas painting #07070E over everything (was line 244 in app.js)
+- Brightened colors through multiple iterations:
+  1. #363748 / #404262 (user liked this)
+  2. #5e5f78 / #717292 (too light — reverted)
+- Final: #363748 / #404262 ✓
+- Increased particle opacity, connection line brightness, glyph visibility
+
+* Design Decisions
+
+| Decision | Why |
+|----------+-----|
+| Vanilla JS (no framework) | No build step, simple to share |
+| Local JSON for materials | Works offline immediately |
+| Canvas API for background | Smooth animation, no text movement |
+| Python http.server | Zero deps to run locally |
+| localStorage | No server needed for persistence |
+
+* Roadmap
+
+** Short Term
+- [ ] PWA manifest (installable on desktop/mobile)
+- [ ] Settings panel (default markup, labor rate, tax, waste factor)
+- [ ] Theme picker (light / dark / custom colors)
+- [ ] Print-friendly CSS
+- [ ] Better mobile layout
+
+** Medium Term
+- [ ] Home Depot live API pricing (needs API key)
+- [ ] Zip code → local pricing
+- [ ] Tauri desktop wrapper
+- [ ] Template library
+- [ ] PDF invoice generation
+
+** Long Term
+- [ ] Cloud sync
+- [ ] Multi-user collaboration
+- [ ] Mobile app
+
+* Key Commands
+
+#+BEGIN_SRC sh
+# Run
+cd ~/Projects/estimate-app && python3 -m http.server 8080
+
+# Push updates
+cd ~/Projects/estimate-app
+git add -A && git commit -m "message" && git push
+#+END_SRC
+
+* Related Files
+
+- ~/Projects/estimate-app/index.html
+- ~/Projects/estimate-app/styles.css
+- ~/Projects/estimate-app/app.js
+- ~/Projects/estimate-app/data/materials.json
+- ~/Projects/estimate-app/data/ca-codes.json
+- ~/Projects/estimate-app/obsidian-template.md

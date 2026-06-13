@@ -1,0 +1,548 @@
+[
+  {
+    "code": "CRC",
+    "section": "R301.2",
+    "title": "Load Combinations",
+    "description": "Buildings and structures shall be designed for minimum live, dead, and wind loads. Critical for structural calculations in remodels involving roof loads, floor loads, or wall removal.",
+    "keywords": ["structural", "load", "weight", "design", "live load", "dead load", "wind", "snow"]
+  },
+  {
+    "code": "CRC",
+    "section": "R302.1",
+    "title": "Exterior Walls - Fire Resistance",
+    "description": "Exterior walls must have fire resistance ratings based on proximity to property lines and other buildings. Applies when adding windows, doors, or altering exterior walls.",
+    "keywords": ["fire", "exterior wall", "fire resistance", "property line", "fire rating"]
+  },
+  {
+    "code": "CRC",
+    "section": "R302.5",
+    "title": "Garage Opening Protection",
+    "description": "Doors between garage and dwelling must be self-closing 20-minute fire-rated assemblies. Any penetration must be caulked or sealed.",
+    "keywords": ["garage", "fire door", "self-closing", "garage conversion", "fire rated"]
+  },
+  {
+    "code": "CRC",
+    "section": "R302.13",
+    "title": "Fire Protection of Floors",
+    "description": "Floor assemblies separating dwelling units or between a dwelling and attached garage must be protected with 5/8\" Type X gypsum board.",
+    "keywords": ["floor", "fire protection", "gypsum", "type x", "garage ceiling", "fire separation"]
+  },
+  {
+    "code": "CRC",
+    "section": "R303.1",
+    "title": "Habitable Rooms - Light and Ventilation",
+    "description": "Habitable rooms must have minimum glazing area of 8% of floor area and openable area of 4% for natural ventilation. Key for remodels converting basements or adding rooms.",
+    "keywords": ["light", "ventilation", "window", "habitable", "basement", "egress", "glazing"]
+  },
+  {
+    "code": "CRC",
+    "section": "R303.3",
+    "title": "Bathroom Ventilation",
+    "description": "Bathrooms must have an exhaust fan vented to the outside (minimum 50 CFM intermittent or 20 CFM continuous). Required in all bathroom remodels.",
+    "keywords": ["bathroom", "ventilation", "exhaust fan", "bath fan", "moisture", "vent"]
+  },
+  {
+    "code": "CRC",
+    "section": "R303.4",
+    "title": "Mechanical Ventilation",
+    "description": "When natural ventilation is insufficient, mechanical ventilation must be provided per ASHRAE 62.2. Required for tight homes and additions.",
+    "keywords": ["mechanical ventilation", "ASHRAE", "air quality", "HRV", "ERV", "fresh air"]
+  },
+  {
+    "code": "CRC",
+    "section": "R304.1",
+    "title": "Minimum Room Area",
+    "description": "Habitable rooms must have a minimum of 70 sq ft of floor area. Affects remodel layouts and room reconfigurations.",
+    "keywords": ["room size", "minimum area", "habitable room", "floor area", "space"]
+  },
+  {
+    "code": "CRC",
+    "section": "R305.1",
+    "title": "Minimum Ceiling Height",
+    "description": "Habitable rooms and hallways must have a minimum ceiling height of 7 ft. Basements, bathrooms, and laundry rooms have exceptions. Critical for basement finishing and remodels.",
+    "keywords": ["ceiling height", "minimum height", "basement", "finish", "headroom", "7 foot"]
+  },
+  {
+    "code": "CRC",
+    "section": "R306.1",
+    "title": "Sanitation - Toilet Facilities",
+    "description": "Each dwelling must have at least one water closet, lavatory, bathtub or shower. Required for any ADU or addition.",
+    "keywords": ["toilet", "bathroom", "plumbing fixture", "sanitation", "ADU", "minimum"]
+  },
+  {
+    "code": "CRC",
+    "section": "R307.1",
+    "title": "Bathroom Clearances",
+    "description": "Minimum clearances in front of toilet (21 inches), lavatory (21 inches), and tub/shower entry. Critical for bathroom remodel layout planning.",
+    "keywords": ["bathroom", "clearance", "toilet space", "bathroom layout", "ADA"]
+  },
+  {
+    "code": "CRC",
+    "section": "R308.3",
+    "title": "Hazardous Glazing Locations",
+    "description": "Glazing in hazardous locations (doors, side panels, low windows, showers) must be safety tempered or laminated. Required in all remodel work near glazing.",
+    "keywords": ["glass", "glazing", "tempered", "safety glass", "shower door", "window", "door"]
+  },
+  {
+    "code": "CRC",
+    "section": "R308.4",
+    "title": "Glazing in Guards and Railings",
+    "description": "Glazing used in guards, railings, or balustrades must be safety glass and withstand structural loads. Applies to deck remodels and stair upgrades.",
+    "keywords": ["railing", "guard", "balcony", "glass railing", "tempered", "safety", "baluster"]
+  },
+  {
+    "code": "CRC",
+    "section": "R309.1",
+    "title": "Garage Fire Separation",
+    "description": "Garages must be separated from dwelling and interior rooms by 1/2\" gypsum board on garage side. Floor-ceiling assembly above garage must be 5/8\" Type X.",
+    "keywords": ["garage", "fire separation", "gypsum", "type x", "attached garage", "fire"]
+  },
+  {
+    "code": "CRC",
+    "section": "R310.1",
+    "title": "Emergency Escape and Rescue Openings",
+    "description": "Basements and sleeping rooms must have an emergency escape window with minimum opening of 5.7 sq ft, width >= 20\", height >= 24\", and sill height <= 44\". Critical for basement remodels and bedroom additions.",
+    "keywords": ["egress", "escape", "window", "basement", "bedroom", "emergency", "rescue"]
+  },
+  {
+    "code": "CRC",
+    "section": "R311.7",
+    "title": "Stairways",
+    "description": "Stair risers max 7-3/4\", treads min 10\", handrails required on at least one side. Headroom min 6'8\". Applies to any remodel involving stair modification or addition.",
+    "keywords": ["stairs", "stairway", "riser", "tread", "handrail", "staircase", "headroom"]
+  },
+  {
+    "code": "CRC",
+    "section": "R311.7.8",
+    "title": "Stair Handrails",
+    "description": "Handrails required on at least one side of stairs with 4+ risers. Must be between 34\"-38\" measured from stair nosing. Must allow continuous grip.",
+    "keywords": ["handrail", "stairs", "grip", "height", "continuous", "staircase"]
+  },
+  {
+    "code": "CRC",
+    "section": "R312.1",
+    "title": "Guards - Required Height",
+    "description": "Guards required where drop exceeds 30\". Minimum height 36\" for residential. Balusters must not allow passage of 4\" sphere. Critical for decks, balconies, and stair remodels.",
+    "keywords": ["guard", "railing", "balcony", "deck", "height", "baluster", "fall protection"]
+  },
+  {
+    "code": "CRC",
+    "section": "R313",
+    "title": "Automatic Fire Sprinkler Systems",
+    "description": "New one- and two-family dwellings require automatic fire sprinklers. Remodels exceeding 50% of building value may trigger full compliance. Major cost consideration.",
+    "keywords": ["sprinkler", "fire sprinkler", "fire suppression", "sprinkler system", "retrofit"]
+  },
+  {
+    "code": "CRC",
+    "section": "R314.1",
+    "title": "Smoke Alarms",
+    "description": "Smoke alarms required in each sleeping room, outside each sleeping area, and on every level including basements. Must be hardwired with battery backup and interconnected. Required in any remodel.",
+    "keywords": ["smoke alarm", "smoke detector", "fire safety", "hardwired", "interconnected"]
+  },
+  {
+    "code": "CRC",
+    "section": "R315.1",
+    "title": "Carbon Monoxide Alarms",
+    "description": "CO alarms required outside sleeping areas in dwellings with attached garages or fuel-burning appliances. Must be hardwired with battery backup. Required in most remodels.",
+    "keywords": ["carbon monoxide", "CO alarm", "CO detector", "garage", "furnace", "safety"]
+  },
+  {
+    "code": "CRC",
+    "section": "R316.5",
+    "title": "Foam Plastic Insulation Protection",
+    "description": "Foam plastic insulation must be separated from interior spaces by minimum 1/2\" gypsum board or equivalent thermal barrier. Affects insulation choices in remodels.",
+    "keywords": ["insulation", "foam", "foam board", "thermal barrier", "gypsum", "spray foam"]
+  },
+  {
+    "code": "CRC",
+    "section": "R317.1",
+    "title": "Penetrations of Fire-Resistant Assemblies",
+    "description": "Penetrations through fire-rated assemblies must be protected with approved firestop materials. Applies when running new wiring, ducts, or pipes.",
+    "keywords": ["firestop", "penetration", "fire caulk", "through-penetration", "fire rated"]
+  },
+  {
+    "code": "CRC",
+    "section": "R318.1",
+    "title": "Protection Against Termites",
+    "description": "In CA (moderate to heavy termite probability), wood framing must be minimum 18\" above exposed earth. Requires termite treatment in many areas. Critical for foundation work.",
+    "keywords": ["termite", "wood", "foundation", "earth", "clearance", "treatment", "pest"]
+  },
+  {
+    "code": "CRC",
+    "section": "R319.1",
+    "title": "Site Address",
+    "description": "Address numbers must be clearly visible from the street, minimum 4\" height, contrasting color. Required for any new construction or ADU.",
+    "keywords": ["address", "numbers", "street", "visible", "signage"]
+  },
+  {
+    "code": "CRC",
+    "section": "R322.1",
+    "title": "Flood-Resistant Construction",
+    "description": "In flood hazard areas, buildings must be constructed with flood-resistant materials and elevated to required flood levels. Critical for coastal and floodplain projects.",
+    "keywords": ["flood", "flood zone", "elevation", "floodplain", "FEMA", "flood resistant"]
+  },
+  {
+    "code": "CRC",
+    "section": "R323.1",
+    "title": "Storm Shelters",
+    "description": "In tornado-prone areas, storm shelters may be required for certain occupancies. Less common in CA but relevant in some regions.",
+    "keywords": ["storm", "tornado", "shelter", "safe room", "extreme weather"]
+  },
+  {
+    "code": "CRC",
+    "section": "R324",
+    "title": "Solar Energy Systems",
+    "description": "California requires solar photovoltaic systems on new dwellings (per CALGreen). Roof must accommodate solar access. Affects roof framing and orientation planning.",
+    "keywords": ["solar", "photovoltaic", "PV", "solar panels", "renewable", "energy", "roof"]
+  },
+  {
+    "code": "CRC",
+    "section": "R325",
+    "title": "Mezzanines",
+    "description": "Mezzanines must comply with minimum area, ceiling height, and egress requirements. Relevant for loft additions and open-plan remodels.",
+    "keywords": ["mezzanine", "loft", "open plan", "balcony interior", "partial floor"]
+  },
+  {
+    "code": "CRC",
+    "section": "R326",
+    "title": "Swimming Pools, Spas, and Hot Tubs",
+    "description": "Barrier requirements for pools and spas: minimum 4 ft high, self-closing gates, no climbable features. Critical for pool/spa addition projects.",
+    "keywords": ["pool", "spa", "hot tub", "fence", "barrier", "safety", "gate"]
+  },
+  {
+    "code": "CRC",
+    "section": "R327",
+    "title": "Emergency Planning and Preparedness",
+    "description": "Requirements for emergency access pathways and defensible space in wildfire-prone areas. Critical for CA wildfire zone construction.",
+    "keywords": ["wildfire", "emergency access", "defensible space", "fire zone", "CA fire"]
+  },
+  {
+    "code": "CRC",
+    "section": "R328",
+    "title": "Cannabis Production",
+    "description": "Requirements for dwelling units used for cannabis production, including ventilation, electrical, and fire safety. Relevant for certain CA projects.",
+    "keywords": ["cannabis", "marijuana", "grow", "ventilation", "electrical", "cultivation"]
+  },
+  {
+    "code": "CRC",
+    "section": "R401.1",
+    "title": "Foundations - General",
+    "description": "All exterior walls must be supported on foundations. Minimum foundation depth 12\" below undisturbed soil. Affects additions and foundation repairs.",
+    "keywords": ["foundation", "footing", "concrete", "frost", "depth", "excavation"]
+  },
+  {
+    "code": "CRC",
+    "section": "R403.1",
+    "title": "Minimum Footing Size",
+    "description": "Minimum footing width based on number of stories and soil bearing capacity. Single story: 12\" wide, two story: 15\" wide. Critical for additions.",
+    "keywords": ["footing", "foundation", "width", "concrete", "soil", "bearing capacity"]
+  },
+  {
+    "code": "CRC",
+    "section": "R404.1",
+    "title": "Foundation Walls",
+    "description": "Concrete and masonry foundation walls must comply with minimum thickness and reinforcement requirements based on height and lateral load. Key for basement remodels.",
+    "keywords": ["foundation wall", "basement wall", "concrete", "masonry", "reinforcement", "retaining"]
+  },
+  {
+    "code": "CRC",
+    "section": "R507.1",
+    "title": "Wood Deck Construction",
+    "description": "Decks must be designed for live load of 40 psf and dead load of 10 psf. Connections to building must resist lateral forces. Critical for all deck remodels and additions.",
+    "keywords": ["deck", "wood deck", "deck load", "ledger", "connection", "footing"]
+  },
+  {
+    "code": "CRC",
+    "section": "R602.3",
+    "title": "Wall Framing",
+    "description": "Stud spacing, height, and bracing requirements. Maximum stud spacing 24\" OC. Minimum 2x4 studs for exterior walls. Affects framing in any remodel.",
+    "keywords": ["stud", "framing", "wall", "2x4", "spacing", "header", "bracing"]
+  },
+  {
+    "code": "CRC",
+    "section": "R602.7",
+    "title": "Headers",
+    "description": "Headers required over openings in load-bearing walls. Size based on span and load. Critical for window/door additions and wall removal projects.",
+    "keywords": ["header", "beam", "load bearing", "window header", "door header", "span"]
+  },
+  {
+    "code": "CRC",
+    "section": "R702.3",
+    "title": "Gypsum Board Installation",
+    "description": "Gypsum board must be installed per manufacturer instructions. Fastener spacing, joint treatment, and fire-rated assembly requirements. Applies to all drywall work.",
+    "keywords": ["drywall", "gypsum", "sheetrock", "fastener", "joint", "tape", "mud"]
+  },
+  {
+    "code": "CRC",
+    "section": "R802.1",
+    "title": "Roof Framing",
+    "description": "Roof rafter and ceiling joist sizing based on span, spacing, and load. Minimum 2x6 rafters at 24\" OC for most spans. Affects roof modifications and additions.",
+    "keywords": ["rafter", "roof", "ceiling joist", "truss", "span", "pitch", "framing"]
+  },
+  {
+    "code": "CRC",
+    "section": "R905.1",
+    "title": "Roof Covering",
+    "description": "Roof covering must meet fire classification based on building location. Class A required in wildfire zones. Applies to all re-roofing projects.",
+    "keywords": ["roofing", "shingles", "fire rating", "class A", "re-roof", "roof replacement"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "4.106.4",
+    "title": "Electric Vehicle Charging",
+    "description": "New dwellings must have EV charging infrastructure (panel capacity, conduit to parking). Required for all new construction and major remodels.",
+    "keywords": ["EV", "electric vehicle", "charging", "car charger", "solar", "electrical"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "4.303.1",
+    "title": "Water-Cooling Towers",
+    "description": "Requirements for water conservation in cooling towers. Relevant for commercial HVAC projects.",
+    "keywords": ["cooling tower", "water conservation", "HVAC", "commercial"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "4.303.2",
+    "title": "Water Fountains",
+    "description": "Water fountains must be bottle-filling type. Relevant for commercial remodels and tenant improvements.",
+    "keywords": ["water fountain", "bottle filling", "commercial", "tenant improvement"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "4.304.1",
+    "title": "Drought-Tolerant Landscaping",
+    "description": "Requires use of drought-tolerant plants and efficient irrigation systems. Affects landscaping for new construction and major renovations.",
+    "keywords": ["landscaping", "drought", "water efficient", "irrigation", "native plants"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "4.408.1",
+    "title": "Construction Waste Management",
+    "description": "Minimum 50% diversion of construction waste from landfills. Requires waste management plan. Critical for project bidding and cost estimation.",
+    "keywords": ["waste", "diversion", "recycling", "dumpster", "construction waste", "landfill"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "4.504.1",
+    "title": "Low-VOC Materials",
+    "description": "Paints, adhesives, sealants, and flooring must meet low-VOC content limits. Required for all interior finish work. Affects material selection and costs.",
+    "keywords": ["VOC", "low VOC", "paint", "adhesive", "sealant", "flooring", "air quality"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "4.505.1",
+    "title": "Indoor Moisture Control",
+    "description": "Vapor retarders and moisture control measures to prevent mold. Required in all construction. Affects insulation and wall assembly choices.",
+    "keywords": ["moisture", "mold", "vapor barrier", "vapor retarder", "humidity", "condensation"]
+  },
+  {
+    "code": "CALGreen",
+    "section": "5.503.1",
+    "title": "Commissioning",
+    "description": "Non-residential buildings over 10,000 sq ft require mechanical system commissioning. Relevant for commercial projects.",
+    "keywords": ["commissioning", "HVAC", "mechanical", "commercial", "testing", "balancing"]
+  },
+  {
+    "code": "CBC",
+    "section": "Chapter 11A",
+    "title": "Accessibility - Residential (Housing)",
+    "description": "Adaptable housing requirements for multi-family dwellings. Includes accessible routes, kitchen/bathroom adaptation provisions. Critical for multi-family projects.",
+    "keywords": ["accessibility", "ADA", "accessible", "handicap", "wheelchair", "adaptable", "multi-family"]
+  },
+  {
+    "code": "CBC",
+    "section": "Chapter 11B",
+    "title": "Accessibility - Public Accommodations",
+    "description": "Accessibility requirements for public buildings and commercial spaces. Includes accessible routes, bathrooms, parking. Required for all commercial remodels.",
+    "keywords": ["accessibility", "ADA", "commercial", "public", "wheelchair", "ramp", "accessible route"]
+  },
+  {
+    "code": "CBC",
+    "section": "Chapter 7A",
+    "title": "Exterior Wildfire Exposure",
+    "description": "Materials and construction methods for buildings in wildfire zones. Includes ignition-resistant roofing, siding, decking, and venting. Critical for CA wildfire areas.",
+    "keywords": ["wildfire", "fire resistant", "ignition", "defensible", "ember", "WUI", "fire zone"]
+  },
+  {
+    "code": "CBC",
+    "section": "903.2",
+    "title": "Fire Sprinkler Systems - Where Required",
+    "description": "Fire sprinkler requirements based on occupancy group, building area, and height. Major cost consideration for commercial and multi-family projects.",
+    "keywords": ["sprinkler", "fire sprinkler", "NFPA 13", "commercial", "suppression"]
+  },
+  {
+    "code": "CEBC",
+    "section": "Chapter 4",
+    "title": "Classification of Work",
+    "description": "Defines alterations as Level 1 (finish only), Level 2 (reconfiguration), or Level 3 (extensive structural). Determines code compliance path for remodel projects.",
+    "keywords": ["alteration", "remodel classification", "level 1", "level 2", "level 3", "scope"]
+  },
+  {
+    "code": "CEBC",
+    "section": "501.2",
+    "title": "Repairs - General",
+    "description": "Repairs must not make the building less compliant than before. Applies to all repair work in existing buildings.",
+    "keywords": ["repair", "existing building", "maintenance", "compliance", "alteration"]
+  },
+  {
+    "code": "CEBC",
+    "section": "601.2",
+    "title": "Level 1 Alterations",
+    "description": "Finish-only alterations (paint, flooring, cabinets) require compliance for the work itself but not full building upgrade. Least restrictive path.",
+    "keywords": ["alteration level 1", "finish", "cosmetic", "paint", "flooring", "cabinets"]
+  },
+  {
+    "code": "CEBC",
+    "section": "701.2",
+    "title": "Level 2 Alterations",
+    "description": "Reconfiguration of space (wall moves, room changes) requires compliance for the altered area plus 20% of the building value in upgrades. Common for tenant improvements.",
+    "keywords": ["alteration level 2", "tenant improvement", "reconfiguration", "wall move"]
+  },
+  {
+    "code": "CEBC",
+    "section": "801.2",
+    "title": "Level 3 Alterations",
+    "description": "Extensive structural alterations trigger full building compliance for seismic, fire, and accessibility. Major cost implications.",
+    "keywords": ["alteration level 3", "structural", "extensive", "seismic", "full compliance"]
+  },
+  {
+    "code": "CPC",
+    "section": "Chapter 6",
+    "title": "Water Supply and Distribution",
+    "description": "Minimum pipe sizes, fixture counts, and backflow prevention requirements. Critical for plumbing remodels and additions.",
+    "keywords": ["water supply", "pipe", "copper", "PEX", "backflow", "fixture", "plumbing"]
+  },
+  {
+    "code": "CPC",
+    "section": "Chapter 7",
+    "title": "Sanitary Drainage",
+    "description": "Drain pipe sizing, slope requirements (1/4\" per ft for 3\" and smaller), and venting requirements. Critical for any added fixtures.",
+    "keywords": ["drain", "waste", "vent", "DWV", "slope", "pipe", "sanitary", "sewer"]
+  },
+  {
+    "code": "CPC",
+    "section": "Chapter 9",
+    "title": "Vents",
+    "description": "Vent sizing, distance from trap, and vent termination requirements. Critical when adding plumbing fixtures in remodels.",
+    "keywords": ["vent", "plumbing vent", "trap", "waste pipe", "stack", "roof vent"]
+  },
+  {
+    "code": "CMC",
+    "section": "Chapter 3",
+    "title": "General Regulations - Mechanical",
+    "description": "Heating and cooling load calculations, equipment sizing, and duct design requirements. Required for HVAC replacement or addition.",
+    "keywords": ["HVAC", "heating", "cooling", "load calculation", "Manual J", "duct"]
+  },
+  {
+    "code": "CMC",
+    "section": "Chapter 4",
+    "title": "Ventilation Air",
+    "description": "Minimum ventilation requirements for occupied spaces. Outdoor air rates per ASHRAE 62. Applies to all occupied spaces.",
+    "keywords": ["ventilation", "fresh air", "outdoor air", "ASHRAE 62", "air exchange"]
+  },
+  {
+    "code": "CEC",
+    "section": "210.52",
+    "title": "Dwelling Unit Receptacle Outlets",
+    "description": "Receptacle spacing requirements: no point along wall more than 6 ft from an outlet. Required spacing in kitchens, bathrooms, and outdoors. Affects all electrical work.",
+    "keywords": ["outlet", "receptacle", "spacing", "kitchen", "bathroom", "countertop", "electrical"]
+  },
+  {
+    "code": "CEC",
+    "section": "210.8",
+    "title": "GFCI Protection",
+    "description": "GFCI outlets required in bathrooms, kitchens, garages, outdoors, basements, and within 6 ft of sinks. Required for all new/replaced outlets in these areas.",
+    "keywords": ["GFCI", "ground fault", "outlet", "safety", "bathroom", "kitchen", "garage"]
+  },
+  {
+    "code": "CEC",
+    "section": "210.12",
+    "title": "AFCI Protection",
+    "description": "AFCI breakers required for all 15A and 20A branch circuits supplying sleeping areas and most habitable rooms. Required for new circuits in remodels.",
+    "keywords": ["AFCI", "arc fault", "breaker", "safety", "bedroom", "circuit", "panel"]
+  },
+  {
+    "code": "CEC",
+    "section": "230.70",
+    "title": "Service Disconnect",
+    "description": "Service disconnect must be at a readily accessible location. Main panel clearance requirements. Important for panel upgrade projects.",
+    "keywords": ["service disconnect", "main breaker", "panel", "clearance", "electric service"]
+  },
+  {
+    "code": "CEC",
+    "section": "250.119",
+    "title": "Equipment Grounding",
+    "description": "All raceways, cable trays, and enclosures must be mechanically and electrically continuous. Required for all electrical installations.",
+    "keywords": ["grounding", "bonding", "ground wire", "safety", "electrical"]
+  },
+  {
+    "code": "CEC",
+    "section": "300.4",
+    "title": "Protection of Conductors",
+    "description": "Wiring must be protected from physical damage. Nail plates required where wires pass through studs within 1-1/4\" of edge. Required for all rough-in work.",
+    "keywords": ["nail plate", "wire protection", "conductor", "stud", "rough-in", "electrical"]
+  },
+  {
+    "code": "CEC",
+    "section": "314.27",
+    "title": "Outlet Boxes",
+    "description": "Minimum box fill calculations and support requirements. Box must be sized for number of conductors. Applies to all electrical box installations.",
+    "keywords": ["junction box", "outlet box", "box fill", "support", "enclosure"]
+  },
+  {
+    "code": "CEC",
+    "section": "406.9",
+    "title": "Receptacles in Wet Locations",
+    "description": "Outdoor and wet-location receptacles must have weather-resistant covers. Required for all exterior outlet installations.",
+    "keywords": ["weather resistant", "outdoor outlet", "cover", "wet location", "WR"]
+  },
+  {
+    "code": "CEC",
+    "section": "410.16",
+    "title": "Luminaires in Clothes Closets",
+    "description": "Clearance requirements for light fixtures in closets based on storage area. Surface-mounted LED must be 12\" from storage. Important for all closet projects.",
+    "keywords": ["closet light", "luminaire", "clearance", "storage", "LED closet"]
+  },
+  {
+    "code": "CEC",
+    "section": "422.16",
+    "title": "Appliances - Disconnecting Means",
+    "description": "Built-in appliances must have a means of disconnect within sight or be capable of being locked off. Required for kitchen remodels.",
+    "keywords": ["appliance", "disconnect", "kitchen", "range", "dishwasher", "built-in"]
+  },
+  {
+    "code": "CEC",
+    "section": "422.44",
+    "title": "Dishwasher Connection",
+    "description": "Dishwashers must be connected with a cord and plug or a dedicated disconnect. Required for kitchen remodels.",
+    "keywords": ["dishwasher", "connection", "disconnect", "kitchen", "appliance"]
+  },
+  {
+    "code": "CEC",
+    "section": "550.1",
+    "title": "Manufactured Buildings and Structures",
+    "description": "Requirements for manufactured homes and ADUs. Relevant for prefab ADU installations.",
+    "keywords": ["manufactured home", "ADU", "prefab", "modular", "mobile home"]
+  },
+  {
+    "code": "CEC",
+    "section": "625.40",
+    "title": "Electric Vehicle Charging",
+    "description": "EV charging circuit requirements. Level 2 charging requires dedicated 40A or 50A circuit. Required for new EV charger installations.",
+    "keywords": ["EV charger", "electric vehicle", "charging station", "Level 2", "circuit"]
+  },
+  {
+    "code": "CEC",
+    "section": "690.1",
+    "title": "Solar Photovoltaic Systems",
+    "description": "PV system installation requirements including rapid shutdown, disconnect, and labeling. Required for solar installations.",
+    "keywords": ["solar", "PV", "photovoltaic", "rapid shutdown", "disconnect", "inverter"]
+  },
+  {
+    "code": "CEC",
+    "section": "700.1",
+    "title": "Emergency Systems",
+    "description": "Emergency lighting and power requirements for commercial buildings. Required for egress paths in commercial remodels.",
+    "keywords": ["emergency", "lighting", "backup", "battery", "egress", "commercial"]
+  }
+]

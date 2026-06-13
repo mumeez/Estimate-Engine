@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estimate Engine — Construction & Remodel</title>
+  <link rel="stylesheet" href="styles.css?v=7" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="app">
+    <!-- ═══ HEADER ═══ -->
+    <header id="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-icon">◈</span>
+          <h1>Estimate Engine</h1>
+        </div>
+        <span class="tagline">construction &amp; remodel pricing</span>
+      </div>
+      <div class="header-right">
+        <div class="mode-toggle">
+          <span class="mode-label" id="mode-label">Simple</span>
+          <label class="switch">
+            <input type="checkbox" id="mode-switch" />
+            <span class="slider"></span>
+          </label>
+          <span class="mode-label mode-label-adv">Advanced</span>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-sm" id="btn-new" title="New Estimate">⟳ New</button>
+          <button class="btn btn-sm" id="btn-save" title="Save Estimate">◈ Save</button>
+          <button class="btn btn-sm" id="btn-load" title="Load Estimate">◈ Load</button>
+          <button class="btn btn-sm btn-accent" id="btn-export" title="Export as PDF">📄 Export</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══ MAIN LAYOUT ═══ -->
+    <main id="main-content">
+      <!-- ───── LEFT PANEL: PROJECT INFO & ITEMS ───── -->
+      <section id="panel-left">
+        <!-- Project Info -->
+        <div class="card" id="project-card">
+          <div class="card-header">
+            <span class="card-icon">◈</span>
+            <h2>Project</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="project-name">Project Name</label>
+                <input type="text" id="project-name" placeholder="e.g. Kitchen Remodel" />
+              </div>
+              <div class="form-group">
+                <label for="customer-name">Customer</label>
+                <input type="text" id="customer-name" placeholder="Client name" />
+              </div>
+              <div class="form-group form-group-sm">
+                <label for="estimate-date">Date</label>
+                <input type="date" id="estimate-date" />
+              </div>
+            </div>
+            <!-- Advanced fields -->
+            <div class="advanced-fields" id="adv-project-fields">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="customer-email">Email</label>
+                  <input type="email" id="customer-email" placeholder="client@email.com" />
+                </div>
+                <div class="form-group">
+                  <label for="customer-phone">Phone</label>
+                  <input type="text" id="customer-phone" placeholder="(555) 123-4567" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-group-full">
+                  <label for="customer-address">Address</label>
+                  <input type="text" id="customer-address" placeholder="123 Main St, City, State ZIP" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-group-full">
+                  <label for="estimate-notes">Notes</label>
+                  <textarea id="estimate-notes" rows="2" placeholder="Scope notes, exclusions, etc."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Items -->
+        <div class="card" id="items-card">
+          <div class="card-header">
+            <span class="card-icon">✦</span>
+            <h2>Materials &amp; Labor</h2>
+          </div>
+          <div class="card-body">
+            <!-- Add item form -->
+            <div class="add-item-form">
+              <div class="form-row add-item-row">
+                <div class="form-group form-group-category">
+                  <label for="item-category">Category</label>
+                  <select id="item-category">
+                    <option value="">Select category...</option>
+                  </select>
+                </div>
+                <div class="form-group form-group-item">
+                  <label for="item-search">Material / Item</label>
+                  <div class="autocomplete-wrapper">
+                    <input type="text" id="item-search" placeholder="Type to search materials..." autocomplete="off" />
+                    <div class="autocomplete-results" id="autocomplete-results"></div>
+                  </div>
+                </div>
+                <div class="form-group form-group-qty">
+                  <label for="item-qty">Qty</label>
+                  <input type="number" id="item-qty" value="1" min="0.5" step="0.5" />
+                </div>
+                <div class="form-group form-group-price">
+                  <label for="item-unit-price">Unit Price</label>
+                  <input type="number" id="item-unit-price" value="0.00" min="0" step="0.01" />
+                </div>
+                <div class="form-group form-group-unit">
+                  <label for="item-unit">Unit</label>
+                  <input type="text" id="item-unit" value="ea" placeholder="ea" />
+                </div>
+                <div class="form-group form-group-add-btn">
+                  <label>&nbsp;</label>
+                  <button class="btn btn-primary" id="btn-add-item">+ Add</button>
+                </div>
+              </div>
+              <!-- Advanced item fields -->
+              <div class="advanced-fields" id="adv-item-fields">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="item-category-labor">Labor Category</label>
+                    <select id="item-category-labor">
+                      <option value="general">General Labor</option>
+                      <option value="demolition">Demolition</option>
+                      <option value="framing">Framing</option>
+                      <option value="drywall">Drywall</option>
+                      <option value="flooring">Flooring</option>
+                      <option value="painting">Painting</option>
+                      <option value="plumbing">Plumbing</option>
+                      <option value="electrical">Electrical</option>
+                      <option value="finish">Finish / Trim</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="item-markup">Markup %</label>
+                    <input type="number" id="item-markup" value="10" min="0" max="100" step="1" />
+                  </div>
+                  <div class="form-group">
+                    <label for="item-waste">Waste %</label>
+                    <input type="number" id="item-waste" value="10" min="0" max="50" step="1" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Items Table -->
+            <div class="table-wrapper">
+              <table id="items-table">
+                <thead>
+                  <tr>
+                    <th class="th-category">Category</th>
+                    <th class="th-item">Item</th>
+                    <th class="th-qty">Qty</th>
+                    <th class="th-unit">Unit</th>
+                    <th class="th-price">Unit Price</th>
+                    <th class="th-markup">Markup</th>
+                    <th class="th-total">Total</th>
+                    <th class="th-actions"></th>
+                  </tr>
+                </thead>
+                <tbody id="items-tbody">
+                  <!-- Rows inserted by JS -->
+                </tbody>
+              </table>
+            </div>
+            <div class="table-empty" id="table-empty">
+              <span>No items yet. Select a category and search for materials above.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Notes (always visible) -->
+        <div class="card" id="notes-card">
+          <div class="card-header">
+            <span class="card-icon">◈</span>
+            <h2>Project Notes</h2>
+          </div>
+          <div class="card-body">
+            <textarea id="project-notes" rows="5" placeholder="Scope of work, special conditions, exclusions, notes to client...&#10;&#10;Tip: You can use markdown-like formatting here. This content will be included in the Obsidian export."></textarea>
+            <div class="form-row" style="margin-top:6px;">
+              <div class="form-group form-group-full">
+                <label for="project-status">Project Status</label>
+                <select id="project-status">
+                  <option value="estimating">🟡 Estimating</option>
+                  <option value="proposal">🔵 Proposal Sent</option>
+                  <option value="active">🟢 Active / In Progress</option>
+                  <option value="change">🟠 Change Order</option>
+                  <option value="completed">⚪ Completed</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced: Subcontractors, Equipment, Permits -->
+        <div class="advanced-fields" id="adv-other-costs">
+          <div class="card" id="sub-card">
+            <div class="card-header">
+              <span class="card-icon">⚒</span>
+              <h2>Subcontractors</h2>
+            </div>
+            <div class="card-body">
+              <div class="add-item-row add-sub-row">
+                <div class="form-group">
+                  <input type="text" id="sub-name" placeholder="Trade name" />
+                </div>
+                <div class="form-group form-group-qty">
+                  <input type="number" id="sub-cost" value="0" min="0" step="1" placeholder="Cost" />
+                </div>
+                <div class="form-group form-group-qty">
+                  <input type="text" id="sub-license" placeholder="License #" />
+                </div>
+                <div class="form-group form-group-add-btn-sm">
+                  <button class="btn btn-sm btn-primary" id="btn-add-sub">+ Add</button>
+                </div>
+              </div>
+              <table id="sub-table">
+                <thead>
+                  <tr><th>Trade</th><th>Cost</th><th>License</th><th></th></tr>
+                </thead>
+                <tbody id="sub-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" id="equip-card">
+            <div class="card-header">
+              <span class="card-icon">▣</span>
+              <h2>Equipment</h2>
+            </div>
+            <div class="card-body">
+              <div class="add-item-row add-sub-row">
+                <div class="form-group">
+                  <input type="text" id="equip-name" placeholder="Equipment name" />
+                </div>
+                <div class="form-group form-group-qty">
+                  <input type="number" id="equip-cost" value="0" min="0" step="1" placeholder="Cost" />
+                </div>
+                <div class="form-group form-group-add-btn-sm">
+                  <button class="btn btn-sm btn-primary" id="btn-add-equip">+ Add</button>
+                </div>
+              </div>
+              <table id="equip-table">
+                <thead>
+                  <tr><th>Equipment</th><th>Cost</th><th></th></tr>
+                </thead>
+                <tbody id="equip-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" id="permit-card">
+            <div class="card-header">
+              <span class="card-icon">◉</span>
+              <h2>Permits &amp; Fees</h2>
+            </div>
+            <div class="card-body">
+              <div class="add-item-row add-sub-row">
+                <div class="form-group">
+                  <input type="text" id="permit-name" placeholder="Permit / fee" />
+                </div>
+                <div class="form-group form-group-qty">
+                  <input type="number" id="permit-cost" value="0" min="0" step="1" placeholder="Amount" />
+                </div>
+                <div class="form-group form-group-add-btn-sm">
+                  <button class="btn btn-sm btn-primary" id="btn-add-permit">+ Add</button>
+                </div>
+              </div>
+              <table id="permit-table">
+                <thead>
+                  <tr><th>Permit / Fee</th><th>Amount</th><th></th></tr>
+                </thead>
+                <tbody id="permit-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Crew & Timeline -->
+          <div class="card" id="crew-card">
+            <div class="card-header">
+              <span class="card-icon">◈</span>
+              <h2>Crew &amp; Timeline</h2>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group form-group-sm">
+                  <label for="crew-size">Number of Workers</label>
+                  <input type="number" id="crew-size" value="1" min="1" max="50" step="1" />
+                </div>
+                <div class="form-group form-group-sm">
+                  <label for="project-duration">Est. Duration (days)</label>
+                  <input type="number" id="project-duration" value="1" min="0.5" step="0.5" />
+                </div>
+                <div class="form-group form-group-sm">
+                  <label for="project-start">Start Date</label>
+                  <input type="date" id="project-start" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-group-full">
+                  <label for="crew-notes">Crew Notes (roles, certifications, etc.)</label>
+                  <input type="text" id="crew-notes" placeholder="e.g. 2 carpenters, 1 laborer, 1 apprentice" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Orders -->
+          <div class="card" id="change-card">
+            <div class="card-header">
+              <span class="card-icon">⟳</span>
+              <h2>Change Orders</h2>
+            </div>
+            <div class="card-body">
+              <div class="add-item-row add-sub-row">
+                <div class="form-group">
+                  <input type="text" id="change-desc" placeholder="Description of change" />
+                </div>
+                <div class="form-group form-group-qty">
+                  <input type="number" id="change-amount" value="0" min="0" step="1" placeholder="$ Amount" />
+                </div>
+                <div class="form-group form-group-add-btn-sm">
+                  <button class="btn btn-sm btn-primary" id="btn-add-change">+ Add</button>
+                </div>
+              </div>
+              <table id="change-table">
+                <thead>
+                  <tr><th>Description</th><th>Amount</th><th>Status</th><th></th></tr>
+                </thead>
+                <tbody id="change-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───── RIGHT PANEL: SUMMARY ───── -->
+      <aside id="panel-right">
+        <div class="card card-summary" id="summary-card">
+          <div class="card-header">
+            <span class="card-icon">◈</span>
+            <h2>Estimate Summary</h2>
+          </div>
+          <div class="card-body">
+            <!-- Materials -->
+            <div class="summary-section">
+              <div class="summary-line">
+                <span>Materials Subtotal</span>
+                <span class="summary-value" id="sum-materials">$0.00</span>
+              </div>
+              <div class="summary-line summary-line-editable">
+                <span>Material Markup</span>
+                <span class="summary-input-group">
+                  <input type="number" id="markup-percent" value="10" min="0" max="100" step="0.5" class="summary-input" />
+                  <span class="summary-value" id="sum-markup">$0.00</span>
+                </span>
+              </div>
+              <div class="advanced-fields">
+                <div class="summary-line summary-line-editable">
+                  <span>Waste Factor</span>
+                  <span class="summary-input-group">
+                    <input type="number" id="waste-percent" value="10" min="0" max="50" step="0.5" class="summary-input" />
+                    <span class="summary-value" id="sum-waste">$0.00</span>
+                  </span>
+                </div>
+              </div>
+              <div class="summary-line summary-line-total">
+                <span>Total Materials</span>
+                <span class="summary-value" id="sum-materials-total">$0.00</span>
+              </div>
+            </div>
+
+            <!-- Labor -->
+            <div class="summary-section">
+              <div class="summary-line summary-line-editable">
+                <span>Labor Hours</span>
+                <span class="summary-input-group">
+                  <input type="number" id="labor-hours" value="0" min="0" step="0.5" class="summary-input" />
+                </span>
+              </div>
+              <div class="summary-line summary-line-editable">
+                <span>Hourly Rate</span>
+                <span class="summary-input-group rate-group">
+                  <input type="range" id="hourly-rate-slider" min="15" max="250" value="75" step="5" />
+                  <span class="rate-value" id="hourly-rate-display">$75</span>
+                </span>
+              </div>
+              <div class="summary-line">
+                <span>Total Labor</span>
+                <span class="summary-value" id="sum-labor">$0.00</span>
+              </div>
+            </div>
+
+            <!-- Advanced labor breakdown -->
+            <div class="advanced-fields" id="adv-labor-breakdown">
+              <div class="summary-section">
+                <div class="summary-line summary-sub-header">
+                  <span>Labor Breakdown</span>
+                </div>
+                <div id="labor-breakdown-detail"></div>
+              </div>
+            </div>
+
+            <!-- Advanced costs -->
+            <div class="advanced-fields" id="adv-other-summary">
+              <div class="summary-section">
+                <div class="summary-line">
+                  <span>Subcontractors</span>
+                  <span class="summary-value" id="sum-subcontractors">$0.00</span>
+                </div>
+                <div class="summary-line">
+                  <span>Equipment</span>
+                  <span class="summary-value" id="sum-equipment">$0.00</span>
+                </div>
+                <div class="summary-line">
+                  <span>Permits &amp; Fees</span>
+                  <span class="summary-value" id="sum-permits">$0.00</span>
+                </div>
+              </div>
+              <div class="summary-section">
+                <div class="summary-line summary-line-editable">
+                  <span>Overhead / Burden %</span>
+                  <span class="summary-input-group">
+                    <input type="number" id="overhead-percent" value="0" min="0" max="50" step="0.5" class="summary-input" />
+                    <span class="summary-value" id="sum-overhead">$0.00</span>
+                  </span>
+                </div>
+                <div class="summary-line summary-line-editable">
+                  <span>Profit Margin %</span>
+                  <span class="summary-input-group">
+                    <input type="number" id="profit-percent" value="20" min="0" max="100" step="0.5" class="summary-input" />
+                    <span class="summary-value" id="sum-profit">$0.00</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Discount -->
+            <div class="summary-section">
+              <div class="summary-line summary-line-editable">
+                <span>Discount</span>
+                <span class="summary-input-group">
+                  <input type="number" id="discount-percent" value="0" min="0" max="100" step="0.5" class="summary-input" />
+                  <span class="summary-value" id="sum-discount">$0.00</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Tax -->
+            <div class="summary-section">
+              <div class="summary-line summary-line-editable">
+                <span>Tax</span>
+                <span class="summary-input-group">
+                  <label class="toggle-label">
+                    <input type="checkbox" id="tax-toggle" />
+                    <span class="toggle-text" id="tax-toggle-text">Off</span>
+                  </label>
+                  <input type="number" id="tax-percent" value="7" min="0" max="20" step="0.25" class="summary-input" disabled />
+                  <span class="summary-value" id="sum-tax">$0.00</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Grand Total -->
+            <div class="summary-divider"></div>
+            <div class="summary-line summary-line-grand">
+              <span>Grand Total</span>
+              <span class="summary-value summary-value-grand" id="sum-grand">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card" id="actions-card">
+          <div class="card-body actions-body">
+            <button class="btn btn-primary btn-block" id="btn-save-quick">◈ Save Estimate</button>
+            <button class="btn btn-block btn-accent" id="btn-export-quick">📄 Export / Print</button>
+            <button class="btn btn-block btn-accent" id="btn-export-obsidian">◉ Export to Obsidian</button>
+            <button class="btn btn-block advanced-fields" id="btn-calculators">▣ Quick Calculators</button>
+            <button class="btn btn-block" id="btn-reset">⟳ New Estimate</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- ═══ MODAL OVERLAY ═══ -->
+    <div id="modal-overlay" class="modal-hidden">
+      <div class="modal" id="save-modal">
+        <div class="modal-header">
+          <h3>◈ Save Estimate</h3>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="save-name">Estimate Name</label>
+            <input type="text" id="save-name" placeholder="e.g. Kitchen Remodel - Smith" />
+          </div>
+          <div class="save-list" id="save-list">
+            <h4>Saved Estimates</h4>
+            <div id="saved-estimates"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="modal-cancel">Cancel</button>
+          <button class="btn btn-primary" id="modal-save-confirm">Save</button>
+        </div>
+      </div>
+      <div class="modal" id="load-modal">
+        <div class="modal-header">
+          <h3>◈ Load Estimate</h3>
+          <button class="modal-close" id="load-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="save-list" id="load-list">
+            <div id="load-estimates"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="load-modal-cancel">Cancel</button>
+        </div>
+      </div>
+      <!-- Calculators Modal -->
+      <div class="modal" id="calc-modal" style="width:520px;">
+        <div class="modal-header">
+          <h3>▣ Quick Calculators</h3>
+          <button class="modal-close" id="calc-modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="calc-tabs">
+            <button class="btn btn-sm calc-tab active" data-calc="drywall">Drywall</button>
+            <button class="btn btn-sm calc-tab" data-calc="concrete">Concrete</button>
+            <button class="btn btn-sm calc-tab" data-calc="lumber">Lumber</button>
+            <button class="btn btn-sm calc-tab" data-calc="paint">Paint</button>
+            <button class="btn btn-sm calc-tab" data-calc="flooring">Flooring</button>
+          </div>
+          <div class="calc-pane" id="calc-drywall">
+            <p class="calc-desc">Calculate how many drywall sheets you need.</p>
+            <div class="form-row">
+              <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-dw-width" value="12" step="0.5" /></div>
+              <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-dw-length" value="12" step="0.5" /></div>
+              <div class="form-group"><label>Ceiling Height (ft)</label><input type="number" id="calc-dw-height" value="8" step="0.5" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group form-group-sm"><label>Sheet Size</label><select id="calc-dw-sheet"><option value="32">4x8 (32 sqft)</option><option value="36">4x9 (36 sqft)</option><option value="40">4x10 (40 sqft)</option></select></div>
+              <div class="form-group form-group-sm"><label>Waste %</label><input type="number" id="calc-dw-waste" value="10" min="0" max="50" /></div>
+              <div class="form-group form-group-sm"><label># of Openings</label><input type="number" id="calc-dw-doors" value="2" min="0" /></div>
+            </div>
+            <div class="calc-result" id="calc-dw-result">Sheets needed: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
+            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('drywall')">+ Add to Estimate</button>
+          </div>
+          <div class="calc-pane" id="calc-concrete" style="display:none;">
+            <p class="calc-desc">Calculate concrete volume in cubic yards.</p>
+            <div class="form-row">
+              <div class="form-group"><label>Length (ft)</label><input type="number" id="calc-con-length" value="10" step="0.5" /></div>
+              <div class="form-group"><label>Width (ft)</label><input type="number" id="calc-con-width" value="10" step="0.5" /></div>
+              <div class="form-group"><label>Depth (inches)</label><input type="number" id="calc-con-depth" value="4" step="0.5" /></div>
+            </div>
+            <div class="calc-result" id="calc-con-result">Cubic yards: <strong>0</strong> | 80lb bags: <strong>0</strong> | Total: <strong>$0.00</strong></div>
+            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('concrete')">+ Add to Estimate</button>
+          </div>
+          <div class="calc-pane" id="calc-lumber" style="display:none;">
+            <p class="calc-desc">Calculate lumber needed for wall framing.</p>
+            <div class="form-row">
+              <div class="form-group"><label>Wall Length (ft)</label><input type="number" id="calc-lum-length" value="20" step="0.5" /></div>
+              <div class="form-group form-group-sm"><label>Stud Spacing</label><select id="calc-lum-spacing"><option value="16">16" OC</option><option value="24">24" OC</option></select></div>
+              <div class="form-group form-group-sm"><label>Number of Walls</label><input type="number" id="calc-lum-walls" value="1" min="1" step="1" /></div>
+            </div>
+            <div class="calc-result" id="calc-lum-result">Studs: <strong>0</strong> | Plates: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
+            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('lumber')">+ Add to Estimate</button>
+          </div>
+          <div class="calc-pane" id="calc-paint" style="display:none;">
+            <p class="calc-desc">Calculate how much paint you need.</p>
+            <div class="form-row">
+              <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-pt-width" value="12" step="0.5" /></div>
+              <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-pt-length" value="12" step="0.5" /></div>
+              <div class="form-group"><label>Ceiling Height (ft)</label><input type="number" id="calc-pt-height" value="8" step="0.5" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group form-group-sm"><label># of Windows</label><input type="number" id="calc-pt-windows" value="2" min="0" /></div>
+              <div class="form-group form-group-sm"><label># of Doors</label><input type="number" id="calc-pt-doors" value="1" min="0" /></div>
+              <div class="form-group form-group-sm"><label># of Coats</label><select id="calc-pt-coats"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></div>
+            </div>
+            <div class="calc-result" id="calc-pt-result">Gallons needed: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
+            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('paint')">+ Add to Estimate</button>
+          </div>
+          <div class="calc-pane" id="calc-flooring" style="display:none;">
+            <p class="calc-desc">Calculate flooring material needed.</p>
+            <div class="form-row">
+              <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-fl-width" value="12" step="0.5" /></div>
+              <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-fl-length" value="14" step="0.5" /></div>
+              <div class="form-group form-group-sm"><label>Waste %</label><input type="number" id="calc-fl-waste" value="10" min="0" max="50" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group form-group-sm"><label>Material Price/sqft</label><input type="number" id="calc-fl-price" value="3.99" step="0.01" /></div>
+              <div class="form-group form-group-sm"><label>Material Name</label><input type="text" id="calc-fl-name" value="Flooring Material" /></div>
+            </div>
+            <div class="calc-result" id="calc-fl-result">Total sq ft: <strong>0</strong> | Material cost: <strong>$0.00</strong></div>
+            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('flooring')">+ Add to Estimate</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="calc-modal-cancel">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

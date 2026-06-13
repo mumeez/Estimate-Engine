@@ -1,0 +1,15 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.pyc
+
+# Server logs
+/tmp/
