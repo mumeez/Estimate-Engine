@@ -91,6 +91,29 @@
           </div>
         </div>
 
+        <!-- Project Notes (always visible) — moved above Materials list -->
+        <div class="card" id="notes-card">
+          <div class="card-header">
+            <span class="card-icon">◈</span>
+            <h2>Project Notes</h2>
+          </div>
+          <div class="card-body">
+            <textarea id="project-notes" rows="5" placeholder="Scope of work, special conditions, exclusions, notes to client...&#10;&#10;Tip: You can use markdown-like formatting here. This content will be included in the Obsidian export."></textarea>
+            <div class="form-row" style="margin-top:6px;">
+              <div class="form-group form-group-full">
+                <label for="project-status">Project Status</label>
+                <select id="project-status">
+                  <option value="estimating">🟡 Estimating</option>
+                  <option value="proposal">🔵 Proposal Sent</option>
+                  <option value="active">🟢 Active / In Progress</option>
+                  <option value="change">🟠 Change Order</option>
+                  <option value="completed">⚪ Completed</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Add Items -->
         <div class="card" id="items-card">
           <div class="card-header">
@@ -128,7 +151,10 @@
                 </div>
                 <div class="form-group form-group-add-btn">
                   <label>&nbsp;</label>
-                  <button class="btn btn-primary" id="btn-add-item">+ Add</button>
+                  <div class="add-btn-group">
+                    <button class="btn btn-primary" id="btn-add-item">+ Add</button>
+                    <button class="btn btn-sm" id="btn-cancel-edit" style="display:none;">Cancel</button>
+                  </div>
                 </div>
               </div>
               <!-- Advanced item fields -->
@@ -182,29 +208,6 @@
             </div>
             <div class="table-empty" id="table-empty">
               <span>No items yet. Select a category and search for materials above.</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Project Notes (always visible) -->
-        <div class="card" id="notes-card">
-          <div class="card-header">
-            <span class="card-icon">◈</span>
-            <h2>Project Notes</h2>
-          </div>
-          <div class="card-body">
-            <textarea id="project-notes" rows="5" placeholder="Scope of work, special conditions, exclusions, notes to client...&#10;&#10;Tip: You can use markdown-like formatting here. This content will be included in the Obsidian export."></textarea>
-            <div class="form-row" style="margin-top:6px;">
-              <div class="form-group form-group-full">
-                <label for="project-status">Project Status</label>
-                <select id="project-status">
-                  <option value="estimating">🟡 Estimating</option>
-                  <option value="proposal">🔵 Proposal Sent</option>
-                  <option value="active">🟢 Active / In Progress</option>
-                  <option value="change">🟠 Change Order</option>
-                  <option value="completed">⚪ Completed</option>
-                </select>
-              </div>
             </div>
           </div>
         </div>

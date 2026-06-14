@@ -260,6 +260,25 @@ a:hover { color: var(--text-primary); }
 
 .btn-icon:hover { color: var(--danger); }
 
+.btn-icon-edit:hover { color: var(--accent-light); }
+
+.add-btn-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.btn-editing {
+  background: var(--success) !important;
+  border-color: var(--success) !important;
+  color: #000 !important;
+}
+
+.btn-editing:hover {
+  background: var(--success) !important;
+  box-shadow: 0 0 12px var(--glow-green) !important;
+}
+
 /* ─── CARDS ─── */
 .card {
   background: var(--bg-card);
@@ -1055,4 +1074,21 @@ td.td-actions { text-align: center; }
   h1, h2, h3, h4 { color: #000; }
   .summary-value-grand { color: #000 !important; text-shadow: none; }
   input, select { border: 1px solid #ccc; color: #000; background: #fff; }
+
+  /* Keep notes visible and ensure they flow right after project name */
+  #notes-card {
+    page-break-before: avoid;
+    break-inside: avoid;
+  }
+  #notes-card .card-header h2 {
+    color: #000 !important;
+  }
+
+  /* Hide edit/cancel buttons when printing */
+  .btn-icon-edit,
+  .add-btn-group,
+  #btn-cancel-edit,
+  #btn-add-item {
+    display: none !important;
+  }
 }

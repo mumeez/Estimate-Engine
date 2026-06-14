@@ -32,6 +32,7 @@ let materials = {};       // { category: [{name, price, unit}, ...] }
 let materialsFlat = [];   // [{name, price, unit, category}, ...]
 let caCodes = [];         // CA building codes
 let idCounter = 0;
+let editingItemId = null;  // When set, the add form is in "edit" mode
 
 /* ─── DOM References ─── */
 const $ = (sel) => document.querySelector(sel);
@@ -484,27 +485,92 @@ function addItem(name, category, qty, unitPrice, unit, markup, waste, laborCateg
     showToast('Please enter item name, quantity, and price.', 'warning');
     return;
   }
-  const item = {
-    id: uid(),
-    category: category || 'Uncategorized',
-    name: name.trim(),
-    qty: parseFloat(qty) || 1,
-    unitPrice: parseFloat(unitPrice) || 0,
-    unit: unit || 'ea',
-    markup: markup != null ? parseFloat(markup) : parseFloat(dom.itemMarkup.value || 10),
-    waste: waste != null ? parseFloat(waste) : parseFloat(dom.itemWaste.value || 10),
-    laborCategory: laborCategory || dom.itemLaborCat.value || 'general',
-  };
-  state.items.push(item);
+
+  if (editingItemId) {
+    // ── UPDATE existing item ──
+    const idx = state.items.findIndex(i => i.id === editingItemId);
+    if (idx !== -1) {
+      state.items[idx] = {
+        ...state.items[idx],
+        category: category || 'Uncategorized',
+        name: name.trim(),
+        qty: parseFloat(qty) || 1,
+        unitPrice: parseFloat(unitPrice) || 0,
+        unit: unit || 'ea',
+        markup: markup != null ? parseFloat(markup) : parseFloat(dom.itemMarkup.value || 10),
+        waste: waste != null ? parseFloat(waste) : parseFloat(dom.itemWaste.value || 10),
+        laborCategory: laborCategory || dom.itemLaborCat.value || 'general',
+      };
+    }
+    cancelEdit();
+    showToast('Item updated.', 'success');
+  } else {
+    // ── CREATE new item ──
+    const item = {
+      id: uid(),
+      category: category || 'Uncategorized',
+      name: name.trim(),
+      qty: parseFloat(qty) || 1,
+      unitPrice: parseFloat(unitPrice) || 0,
+      unit: unit || 'ea',
+      markup: markup != null ? parseFloat(markup) : parseFloat(dom.itemMarkup.value || 10),
+      waste: waste != null ? parseFloat(waste) : parseFloat(dom.itemWaste.value || 10),
+      laborCategory: laborCategory || dom.itemLaborCat.value || 'general',
+    };
+    state.items.push(item);
+    clearAddForm();
+  }
+
   renderItems();
   updateSummary();
-  clearAddForm();
 }
 
 function removeItem(id) {
+  // If we're editing this item, cancel edit mode first
+  if (editingItemId === id) cancelEdit();
   state.items = state.items.filter(i => i.id !== id);
   renderItems();
   updateSummary();
+}
+
+function editItem(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+
+  editingItemId = id;
+
+  // Populate the form with the item's current values
+  dom.itemCategory.value = item.category || '';
+  dom.itemSearch.value = item.name;
+  dom.itemQty.value = item.qty;
+  dom.itemUnitPrice.value = item.unitPrice;
+  dom.itemUnit.value = item.unit || 'ea';
+  dom.itemMarkup.value = item.markup;
+  dom.itemWaste.value = item.waste;
+  dom.itemLaborCat.value = item.laborCategory || 'general';
+
+  // Switch button to Update mode
+  dom.btnAddItem.textContent = '↻ Update';
+  dom.btnAddItem.classList.add('btn-editing');
+
+  // Show the cancel button
+  const cancelBtn = document.getElementById('btn-cancel-edit');
+  if (cancelBtn) cancelBtn.style.display = '';
+
+  // Scroll the form into view and focus
+  dom.itemSearch.focus();
+  dom.itemSearch.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cancelEdit() {
+  editingItemId = null;
+  dom.btnAddItem.textContent = '+ Add';
+  dom.btnAddItem.classList.remove('btn-editing');
+
+  const cancelBtn = document.getElementById('btn-cancel-edit');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+
+  clearAddForm();
 }
 
 function clearAddForm() {
@@ -596,6 +662,7 @@ function renderItems() {
       <td class="td-right td-markup">${state.advancedMode ? item.markup + '%' : state.markupPercent + '%'}</td>
       <td class="td-right"><strong>$${grandTotal.toFixed(2)}</strong></td>
       <td class="td-actions">
+        <button class="btn-icon btn-icon-edit" onclick="editItem('${item.id}')" title="Edit">✎</button>
         <button class="btn-icon" onclick="removeItem('${item.id}')" title="Remove">✕</button>
       </td>
     </tr>`;
@@ -777,6 +844,9 @@ function getSavedEstimates() {
 }
 
 function loadEstimate(id) {
+  // Cancel any in-progress edit first
+  if (editingItemId) cancelEdit();
+  
   const saved = getSavedEstimates();
   const data = saved.find(s => s.id === id);
   if (!data) { showToast('Estimate not found.', 'danger'); return; }
@@ -1073,6 +1143,12 @@ function bindEvents() {
     addItem(name, category, qty, price, unit);
   });
 
+  // Cancel edit
+  const cancelBtn = document.getElementById('btn-cancel-edit');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', cancelEdit);
+  }
+
   // Enter key on search field
   dom.itemSearch.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
@@ -1087,8 +1163,13 @@ function bindEvents() {
     }
   });
 
-  // Arrow keys for autocomplete navigation
+  // Arrow keys for autocomplete navigation & Escape to cancel edit
   dom.itemSearch.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && editingItemId) {
+      e.preventDefault();
+      cancelEdit();
+      return;
+    }
     const items = dom.autocompleteResults.querySelectorAll('.autocomplete-item');
     if (items.length === 0) return;
     let idx = Array.from(items).findIndex(el => el.classList.contains('active'));
@@ -1655,6 +1736,7 @@ function addCalcResultToEstimate(type) {
    ════════════════════════════════════════════════════════════════ */
 
 function newEstimate() {
+  if (editingItemId) cancelEdit();
   if (state.items.length > 0 || state.subcontractors.length > 0) {
     if (!confirm('Start a new estimate? Unsaved changes will be lost.')) return;
   }
