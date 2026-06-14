@@ -261,19 +261,24 @@ class ParticleBackground {
   _bindVisibility() {
     this._onVisibility = () => {
       this._running = !document.hidden;
-      if (this._running) this.animate();
+      // RAF chain stays alive automatically — never call animate() directly here.
+      // Calling it would create duplicate chains that multiply exponentially.
     };
     document.addEventListener('visibilitychange', this._onVisibility);
   }
 
   animate() {
-    if (!this._running) return; // paused
+    // ALWAYS queue the next frame first — never let the chain break.
+    // If we return early before queuing, the chain dies and any direct
+    // call to restart it risks creating duplicate chains (exponential blowup).
+    this._rafId = requestAnimationFrame(() => this.animate());
+
+    if (!this._running) return; // paused — just skip work
     const ctx = this.ctx;
     const W = this.W, H = this.H;
-    if (!W || !H) { requestAnimationFrame(() => this.animate()); return; }
+    if (!W || !H) return;
 
     // ── Run physics at 30 fps, draw every frame for smooth visuals ──
-    // This cuts CPU in half while looking nearly identical
     const skip = this._frameCount % 2 === 0;
     this._frameCount = (this._frameCount || 0) + 1;
 
@@ -314,8 +319,6 @@ class ParticleBackground {
 
     ctx.globalAlpha = 1;
     if (!skip) this.t++;
-
-    requestAnimationFrame(() => this.animate());
   }
 
   /* ── Cleanup (unused currently, but nice to have) ── */
