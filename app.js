@@ -189,10 +189,28 @@ class ParticleBackground {
     if (!this.ctx) { console.warn('ParticleBackground: 2d context not available'); return; }
     this.particles = [];
     this.t = 0;
+    this._running = true;
+    this._cachedColor = '#33ff66';
+    this._cachedBg = '#363748';
+    this._cachedBgRgb = { r: 54, g: 55, b: 72 };
+    this.refreshColors();
     this.resize();
-    this.bind();
+    this._bind();
+    this._bindVisibility();
     this.animate();
     console.log('[EstimateEngine] ParticleBackground started (perlin flow)');
+  }
+
+  /* ── Cache theme colors (called on init & theme change) ── */
+  refreshColors() {
+    const s = getComputedStyle(document.body);
+    this._cachedColor = s.getPropertyValue('--text-primary').trim() || '#33ff66';
+    const bgHex = s.getPropertyValue('--bg-deep').trim() || '#363748';
+    this._cachedBg = bgHex;
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(bgHex);
+    this._cachedBgRgb = m
+      ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
+      : { r: 54, g: 55, b: 72 };
   }
 
   /* ── Perlin noise helpers (from Odysseus Terminal theme) ── */
@@ -208,16 +226,6 @@ class ParticleBackground {
     const c = this._noise2d(ix, iy + 1), d = this._noise2d(ix + 1, iy + 1);
     const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
     return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
-  }
-
-  /* ── Read current theme colors from CSS ── */
-  _getColor() {
-    const s = getComputedStyle(document.body);
-    return s.getPropertyValue('--text-primary').trim() || '#33ff66';
-  }
-
-  _getBg() {
-    return getComputedStyle(document.body).getPropertyValue('--bg-deep').trim() || '#363748';
   }
 
   _hexToRgb(hex) {
@@ -244,24 +252,34 @@ class ParticleBackground {
     }
   }
 
-  bind() {
+  _bind() {
     this._onResize = () => this.resize();
     window.addEventListener('resize', this._onResize);
   }
 
+  /* ── Pause animation when window is hidden (saves CPU) ── */
+  _bindVisibility() {
+    this._onVisibility = () => {
+      this._running = !document.hidden;
+      if (this._running) this.animate();
+    };
+    document.addEventListener('visibilitychange', this._onVisibility);
+  }
+
   animate() {
+    if (!this._running) return; // paused
     const ctx = this.ctx;
     const W = this.W, H = this.H;
     if (!W || !H) { requestAnimationFrame(() => this.animate()); return; }
 
     // ── Fade previous frame by layering translucent bg ──
-    const bgHex = this._getBg();
-    const bgRgb = this._hexToRgb(bgHex) || { r: 0, g: 0, b: 0 };
+    // Use cached colors — never call getComputedStyle per frame
+    const bgRgb = this._cachedBgRgb;
     ctx.fillStyle = `rgba(${bgRgb.r},${bgRgb.g},${bgRgb.b},0.03)`;
     ctx.fillRect(0, 0, W, H);
 
     // ── Draw particles ──
-    const color = this._getColor();
+    const color = this._cachedColor;
     this.particles.forEach(p => {
       const n = this._smoothNoise(p.x * 0.004 + this.t * 0.0008, p.y * 0.004 + 100);
       const angle = n * Math.PI * 6;
@@ -290,7 +308,17 @@ class ParticleBackground {
 
     requestAnimationFrame(() => this.animate());
   }
+
+  /* ── Cleanup (unused currently, but nice to have) ── */
+  destroy() {
+    this._running = false;
+    window.removeEventListener('resize', this._onResize);
+    document.removeEventListener('visibilitychange', this._onVisibility);
+  }
 }
+
+/** Module-level reference so setTheme can refresh colors without getComputedStyle per frame */
+let particleBg = null;
 
 /* ════════════════════════════════════════════════════════════════
    MATERIALS DATABASE
@@ -792,6 +820,8 @@ function setTheme(themeName) {
   document.querySelectorAll('.theme-dot').forEach(dot => {
     dot.classList.toggle('active', dot.dataset.theme === themeName);
   });
+  // Refresh particle colors from CSS (no per-frame getComputedStyle needed anymore)
+  if (particleBg) particleBg.refreshColors();
   // Save to localStorage
   localStorage.setItem('eldritch-theme', themeName || 'default');
 }
@@ -2096,7 +2126,7 @@ async function init() {
   try { updateCalc('paint'); } catch(e) {}
   try { updateCalc('flooring'); } catch(e) {}
   // Start particle background
-  try { const bg = new ParticleBackground('bg-canvas'); } catch(e) { console.warn('[Init] background:', e); }
+  try { particleBg = new ParticleBackground('bg-canvas'); } catch(e) { console.warn('[Init] background:', e); }
   showToast('◈ Estimate Engine ready', 'info');
   console.log('[EstimateEngine] init() complete');
 }
