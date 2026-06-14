@@ -72,51 +72,96 @@ Then open the URL shown in the terminal (usually **http://localhost:3000** or **
 
 You can wrap Estimate Engine as a standalone desktop app using [Tauri](https://v2.tauri.app/). The result is a single executable that opens in its own window — no browser, no terminal needed.
 
-**Prerequisites:**
-- Rust (install via `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`)
-- Linux: `sudo pacman -S webkit2gtk-4.1` (Arch) or `sudo apt install libwebkit2gtk-4.1-dev` (Debian/Ubuntu)
-- macOS: `xcode-select --install`
-- Windows: Microsoft C++ Build Tools + WebView2
+The first build compiles all of Tauri's Rust dependencies — expect **15–30 minutes** on the first run. After that, rebuilds are seconds.
 
-**Build:**
+#### macOS
+
 ```bash
+# 1. Install Xcode Command Line Tools
+xcode-select --install
+
+# 2. Install Rust (press Enter at the default prompt)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+
+# 3. Clone and build
 git clone https://github.com/mumeez/Estimate-Engine.git
 cd Estimate-Engine
 npm install
 npx tauri build
 ```
 
-The first build compiles all of Tauri's Rust dependencies — expect **15–30 minutes** on the first run. After that, rebuilds are seconds.
+The finished app will be at `src-tauri/target/release/bundle/dmg/Estimate Engine_1.0.0_x64.dmg` — open the `.dmg` and drag it to Applications. Or launch it immediately:
+```bash
+open src-tauri/target/release/Estimate\ Engine
+```
 
-The output will be at:
-- **Linux:** `src-tauri/target/release/bundle/deb/` (`.deb`) and `src-tauri/target/release/bundle/rpm/` (`.rpm`)
-- **macOS:** `src-tauri/target/release/bundle/dmg/` (`.dmg`)
-- **Windows:** `src-tauri/target/release/bundle/msi/` (`.msi`)
+#### Linux (Arch / CachyOS)
 
-No server needed — the app is fully self-contained.
+```bash
+# 1. Install dependencies
+sudo pacman -S webkit2gtk-4.1
 
-> **Niri / Hyprland users:** The title bar is enabled for stability (required on some NVIDIA+Wayland setups). Since your window manager already manages windows with keyboard shortcuts, the title bar is purely cosmetic. If it really bothers you, set `"decorations": false` in `src-tauri/tauri.conf.json` — but be aware it may crash WebKitGTK on NVIDIA Wayland.
+# 2. Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
 
-**App launcher entry:** After building, run the install script to add it to your desktop applications:
+# 3. Clone and build
+git clone https://github.com/mumeez/Estimate-Engine.git
+cd Estimate-Engine
+npm install
+npx tauri build
+```
+
+The finished app will be at `src-tauri/target/release/estimate-engine` — run it directly:
+```bash
+./src-tauri/target/release/estimate-engine
+```
+
+**NVIDIA + Wayland (Niri / Hyprland) users:** If the app crashes with `Failed to create EGL image for DMABufs`, use the launch wrapper instead:
+```bash
+./estimate-engine.sh
+```
+For a permanent fix, enable NVIDIA DRM modesetting:
+```bash
+echo "options nvidia_drm modeset=1" | sudo tee /etc/modprobe.d/nvidia-drm.conf
+sudo mkinitcpio -P
+# reboot
+```
+
+**App launcher entry:**
 ```bash
 bash install-desktop.sh
 ```
-This copies the binary to `~/.local/bin/` and creates a `.desktop` entry so you can launch it from your app launcher. To uninstall, just delete those files.
 
-**Launch wrapper (NVIDIA Wayland fix):** If you're on NVIDIA + Wayland (Niri, Hyprland, Sway), WebKitGTK may crash with `Failed to create EGL image for DMABufs`. Use the launch wrapper which sets the required environment variables:
+#### Linux (Debian / Ubuntu)
+
 ```bash
-./estimate-engine.sh          # from repo root
-~/.local/bin/estimate-engine.sh  # after install-desktop.sh
+# 1. Install dependencies
+sudo apt install libwebkit2gtk-4.1-dev
+
+# 2. Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"
+
+# 3. Clone and build
+git clone https://github.com/mumeez/Estimate-Engine.git
+cd Estimate-Engine
+npm install
+npx tauri build
 ```
-For a permanent system-level fix, enable NVIDIA DRM modesetting:
-```bash
-# Create a modprobe config
-echo "options nvidia_drm modeset=1" | sudo tee /etc/modprobe.d/nvidia-drm.conf
-# Regenerate initramfs
-sudo mkinitcpio -P
-# Reboot
+
+#### Windows
+
+1. Install [Microsoft C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+2. Install [Rust](https://rustup.rs)
+3. Open PowerShell and run:
+```powershell
+git clone https://github.com/mumeez/Estimate-Engine.git
+cd Estimate-Engine
+npm install
+npx tauri build
 ```
-After rebooting, the app will work without the wrapper script.
 
 ---
 
