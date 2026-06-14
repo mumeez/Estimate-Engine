@@ -91,10 +91,12 @@ npm install
 npx tauri build
 ```
 
-The finished app will be at `src-tauri/target/release/bundle/dmg/Estimate Engine_1.0.0_x64.dmg` — open the `.dmg` and drag it to Applications. Or launch it immediately:
+The finished app will be in `src-tauri/target/release/bundle/dmg/` as a `.dmg` file — open it and drag "Estimate Engine" to your Applications folder. Or launch it immediately from the terminal:
 ```bash
 open src-tauri/target/release/Estimate\ Engine
 ```
+
+> **Apple Silicon (M1/M2/M3/M4/M5):** Fully supported. Rust and Node.js run natively. The build output will be an `aarch64` binary — everything works the same as Intel.
 
 #### Linux (Arch / CachyOS)
 
