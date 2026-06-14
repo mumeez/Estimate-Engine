@@ -103,6 +103,21 @@ bash install-desktop.sh
 ```
 This copies the binary to `~/.local/bin/` and creates a `.desktop` entry so you can launch it from your app launcher. To uninstall, just delete those files.
 
+**Launch wrapper (NVIDIA Wayland fix):** If you're on NVIDIA + Wayland (Niri, Hyprland, Sway), WebKitGTK may crash with `Failed to create EGL image for DMABufs`. Use the launch wrapper which sets the required environment variables:
+```bash
+./estimate-engine.sh          # from repo root
+~/.local/bin/estimate-engine.sh  # after install-desktop.sh
+```
+For a permanent system-level fix, enable NVIDIA DRM modesetting:
+```bash
+# Create a modprobe config
+echo "options nvidia_drm modeset=1" | sudo tee /etc/modprobe.d/nvidia-drm.conf
+# Regenerate initramfs
+sudo mkinitcpio -P
+# Reboot
+```
+After rebooting, the app will work without the wrapper script.
+
 ---
 
 ### Optional Dependencies
