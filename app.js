@@ -172,11 +172,14 @@ class ParticleBackground {
     this.particles = [];
     this.glyphs = [];
     this.stars = [];
+    this.orbs = [];
     this.mouseX = 0;
     this.mouseY = 0;
+    this.time = 0;
     this.resize();
     this.initParticles();
     this.initStars();
+    this.initOrbs();
     this.bind();
     this.animate();
   }
@@ -195,23 +198,30 @@ class ParticleBackground {
   }
 
   initParticles() {
-    const count = Math.min(60, Math.floor(window.innerWidth / 20));
+    const count = Math.min(80, Math.floor(window.innerWidth / 18));
+    const palette = [120, 140, 160, 180, 200, 220, 260, 280, 300, 320];
     for (let i = 0; i < count; i++) {
+      const hue = palette[Math.floor(Math.random() * palette.length)] + (Math.random() - 0.5) * 30;
       this.particles.push({
         x: Math.random() * this.canvas.width,
         y: Math.random() * this.canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3 - 0.1,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35 - 0.05,
         size: Math.random() * 2.5 + 0.8,
         opacity: Math.random() * 0.5 + 0.3,
-        hue: 120 + Math.random() * 60, // green range
+        hue: hue,
+        sat: 70 + Math.random() * 30,
+        light: 55 + Math.random() * 25,
         pulse: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.015 + Math.random() * 0.02,
+        driftX: Math.random() * 0.1 - 0.05,
+        driftY: Math.random() * 0.1 - 0.05,
       });
     }
   }
 
   initStars() {
-    const count = Math.min(100, Math.floor(window.innerWidth / 15));
+    const count = Math.min(120, Math.floor(window.innerWidth / 13));
     for (let i = 0; i < count; i++) {
       this.stars.push({
         x: Math.random() * this.canvas.width,
@@ -219,19 +229,49 @@ class ParticleBackground {
         size: Math.random() * 1.5 + 0.3,
         twinkle: Math.random() * Math.PI * 2,
         speed: 0.02 + Math.random() * 0.03,
+        hue: 120 + Math.random() * 100,
+      });
+    }
+  }
+
+  initOrbs() {
+    // Large, slow-moving glowing orbs for ambient depth
+    const orbColors = [
+      { h: 140, s: 80, l: 50 },  // green
+      { h: 260, s: 70, l: 55 },  // purple
+      { h: 190, s: 75, l: 50 },  // teal
+      { h: 330, s: 65, l: 55 },  // pink
+      { h:  45, s: 80, l: 50 },  // gold
+    ];
+    for (let i = 0; i < 3; i++) {
+      const c = orbColors[i % orbColors.length];
+      this.orbs.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.12,
+        radius: 180 + Math.random() * 220,
+        hue: c.h,
+        sat: c.s,
+        light: c.l,
+        opacity: 0.04 + Math.random() * 0.04,
+        phase: Math.random() * Math.PI * 2,
       });
     }
   }
 
   addGlyph(x, y) {
-    const glyphs = ['◈', '✦', '◉', '◆', '◇', '✧', '⬟', '△', '◍', '◎'];
+    const glyphs = ['◈', '✦', '◉', '◆', '◇', '✧', '⬟', '△', '◍', '◎', '✦', '❖', '⟡'];
+    const hue = 120 + Math.random() * 200;
     this.glyphs.push({
       char: glyphs[Math.floor(Math.random() * glyphs.length)],
       x, y,
-      vy: -0.2 - Math.random() * 0.3,
-      opacity: 0.3 + Math.random() * 0.3,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -0.2 - Math.random() * 0.4,
+      opacity: 0.3 + Math.random() * 0.4,
       life: 1,
-      size: 12 + Math.random() * 16,
+      size: 14 + Math.random() * 20,
+      hue: hue,
     });
   }
 
@@ -239,26 +279,62 @@ class ParticleBackground {
     const ctx = this.ctx;
     const w = this.canvas.width;
     const h = this.canvas.height;
+    this.time += 0.005;
 
-    // Clear with fade (match background color — no more #07070E darkening)
-    ctx.fillStyle = 'rgba(94, 95, 120, 0.25)';
+    // ---------- Fade clear (creates trails) ----------
+    const fadeAlpha = 0.10;
+    ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
     ctx.fillRect(0, 0, w, h);
 
-    // Draw stars
+    // ---------- Draw glowing orbs ----------
+    for (const orb of this.orbs) {
+      // Drift slowly
+      orb.x += orb.vx + Math.sin(this.time + orb.phase) * 0.2;
+      orb.y += orb.vy + Math.cos(this.time + orb.phase * 0.7) * 0.15;
+
+      // Wrap around
+      if (orb.x < -orb.radius) orb.x = w + orb.radius;
+      if (orb.x > w + orb.radius) orb.x = -orb.radius;
+      if (orb.y < -orb.radius) orb.y = h + orb.radius;
+      if (orb.y > h + orb.radius) orb.y = -orb.radius;
+
+      // Mouse attraction (gentle)
+      const dx = orb.x - this.mouseX;
+      const dy = orb.y - this.mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 400 && dist > 0) {
+        orb.x -= dx / dist * 0.15;
+        orb.y -= dy / dist * 0.15;
+      }
+
+      // Draw multi-layered glow
+      for (let layer = 0; layer < 3; layer++) {
+        const r = orb.radius * (1 - layer * 0.25);
+        const alpha = orb.opacity * (1 - layer * 0.2) * (0.8 + 0.2 * Math.sin(this.time * 2 + orb.phase + layer));
+        const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, r);
+        grad.addColorStop(0, `hsla(${orb.hue}, ${orb.sat}%, ${orb.light}%, ${alpha * 0.6})`);
+        grad.addColorStop(0.4, `hsla(${orb.hue + 30}, ${orb.sat}%, ${orb.light + 10}%, ${alpha * 0.3})`);
+        grad.addColorStop(1, `hsla(${orb.hue + 60}, ${orb.sat}%, ${orb.light + 15}%, 0)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(orb.x - r, orb.y - r, r * 2, r * 2);
+      }
+    }
+
+    // ---------- Draw stars ----------
     for (const star of this.stars) {
       star.twinkle += star.speed;
       const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(star.twinkle));
       ctx.beginPath();
       ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(100, 255, 150, ${alpha * 0.7})`;
+      ctx.fillStyle = `hsla(${star.hue}, 70%, 70%, ${alpha * 0.6})`;
       ctx.fill();
     }
 
-    // Draw particles
+    // ---------- Draw particles ----------
     for (const p of this.particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-      p.pulse += 0.02;
+      p.x += p.vx + p.driftX;
+      p.y += p.vy + p.driftY;
+      p.pulse += p.pulseSpeed;
 
       // Wrap around
       if (p.x < 0) p.x = w;
@@ -266,52 +342,71 @@ class ParticleBackground {
       if (p.y < 0) p.y = h;
       if (p.y > h) p.y = 0;
 
-      const pulseAlpha = p.opacity * (0.7 + 0.3 * Math.sin(p.pulse));
+      const pulseFactor = 0.7 + 0.3 * Math.sin(p.pulse);
+      const pulseAlpha = p.opacity * pulseFactor;
+      const size = p.size * (0.9 + 0.1 * Math.sin(p.pulse * 0.7));
+
+      // Glow outer
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, ${pulseAlpha})`;
+      ctx.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, ${pulseAlpha * 0.08})`;
       ctx.fill();
 
-      // Glow
+      // Glow inner
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, ${pulseAlpha * 0.12})`;
+      ctx.arc(p.x, p.y, size * 2, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light + 10}%, ${pulseAlpha * 0.15})`;
+      ctx.fill();
+
+      // Core
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light + 15}%, ${pulseAlpha * 0.85})`;
       ctx.fill();
     }
 
-    // Particle connections (nearby particles form faint lines)
+    // ---------- Particle connections ----------
     for (let i = 0; i < this.particles.length; i++) {
       for (let j = i + 1; j < this.particles.length; j++) {
         const dx = this.particles[i].x - this.particles[j].x;
         const dy = this.particles[i].y - this.particles[j].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 120) {
+        if (dist < 130) {
+          const a = 0.15 * (1 - dist / 130);
+          const hue = (this.particles[i].hue + this.particles[j].hue) / 2;
           ctx.beginPath();
           ctx.moveTo(this.particles[i].x, this.particles[i].y);
           ctx.lineTo(this.particles[j].x, this.particles[j].y);
-          ctx.strokeStyle = `rgba(51, 255, 102, ${0.15 * (1 - dist / 120)})`;
-          ctx.lineWidth = 0.5;
+          ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${a})`;
+          ctx.lineWidth = 0.6;
           ctx.stroke();
         }
       }
     }
 
-    // Draw glyphs
+    // ---------- Draw floating glyphs ----------
     for (let i = this.glyphs.length - 1; i >= 0; i--) {
       const g = this.glyphs[i];
+      g.x += g.vx;
       g.y += g.vy;
-      g.life -= 0.003;
+      g.life -= 0.004;
 
-      if (g.life <= 0 || g.y < -50) {
+      if (g.life <= 0 || g.y < -50 || g.x < -50 || g.x > w + 50) {
         this.glyphs.splice(i, 1);
         continue;
       }
 
+      ctx.save();
       ctx.font = `${g.size}px serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = `rgba(188, 147, 250, ${g.opacity * g.life * 0.7})`;
+      const glow = g.opacity * g.life;
+      // Outer glow
+      ctx.shadowColor = `hsla(${g.hue || 260}, 70%, 60%, ${glow * 0.5})`;
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = `hsla(${g.hue || 260}, 70%, 75%, ${glow * 0.8})`;
       ctx.fillText(g.char, g.x, g.y);
+      ctx.restore();
     }
 
     // Occasionally spawn glyph at mouse
@@ -815,6 +910,39 @@ function toggleMode(advanced) {
 
   renderItems();
   updateSummary();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   THEME SWITCHING
+   ════════════════════════════════════════════════════════════════ */
+
+function setTheme(themeName) {
+  // Remove all theme classes from body
+  document.body.className = document.body.className
+    .split(/\s+/)
+    .filter(c => !c.startsWith('theme-'))
+    .join(' ');
+  if (themeName && themeName !== 'default') {
+    document.body.classList.add(`theme-${themeName}`);
+  }
+  // Update active dot
+  document.querySelectorAll('.theme-dot').forEach(dot => {
+    dot.classList.toggle('active', dot.dataset.theme === themeName);
+  });
+  // Save to localStorage
+  localStorage.setItem('eldritch-theme', themeName || 'default');
+}
+
+function loadSavedTheme() {
+  const saved = localStorage.getItem('eldritch-theme');
+  if (saved) setTheme(saved);
+}
+
+function initThemePicker() {
+  document.querySelectorAll('.theme-dot').forEach(dot => {
+    dot.addEventListener('click', () => setTheme(dot.dataset.theme));
+  });
+  loadSavedTheme();
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1752,10 +1880,37 @@ function performCalc(a, b, op) {
 }
 
 function initBasicCalc() {
-  document.querySelectorAll('.basic-calc-buttons .calc-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+  const container = document.querySelector('.basic-calc-buttons');
+  if (!container) return;
+  // Use event delegation — one listener for all calc buttons
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('.calc-btn');
+    if (btn && btn.dataset.action) {
+      e.preventDefault();
       basicCalcInput(btn.dataset.action);
-    });
+    }
+  });
+  // Keyboard support for the basic calculator
+  const keyMap = {
+    '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+    '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+    '.': 'decimal', ',': 'decimal',
+    '+': 'add', '-': 'subtract', '*': 'multiply', '/': 'divide',
+    'Enter': 'equals', '=': 'equals',
+    'Escape': 'ac', 'Delete': 'ac', 'Backspace': 'c',
+    '%': 'percent',
+  };
+  document.addEventListener('keydown', (e) => {
+    // Only handle calc keys when the basic calc pane is visible
+    const basicPane = document.getElementById('calc-basic');
+    if (!basicPane || basicPane.style.display === 'none') return;
+    // Don't hijack typing in input fields
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    const action = keyMap[e.key];
+    if (action) {
+      e.preventDefault();
+      basicCalcInput(action);
+    }
   });
 }
 
@@ -1965,6 +2120,7 @@ async function init() {
   bindEvents();
   syncStateToUI();
   initBasicCalc();
+  initThemePicker();
   // Run initial calc updates so tabs show values right away
   updateCalc('drywall');
   updateCalc('concrete');
