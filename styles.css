@@ -849,6 +849,20 @@ td.td-actions { text-align: center; }
 
 .saved-item-actions { display: flex; gap: 4px; }
 
+.file-backup-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-backup-hint {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
 /* ─── CODE SEARCH ─── */
 .code-search-wrapper {
   position: relative;

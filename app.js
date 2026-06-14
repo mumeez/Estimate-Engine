@@ -141,6 +141,9 @@ function cacheDom() {
   dom.btnAddChange = $('#btn-add-change');
   dom.changeTbody = $('#change-tbody');
   dom.btnExportObsidian = $('#btn-export-obsidian');
+  dom.btnExportSaves = $('#btn-export-saves');
+  dom.btnImportSaves = $('#btn-import-saves');
+  dom.fileInputSaves = $('#file-input-saves');
 }
 
 /* ─── UUID Generator ─── */
@@ -839,6 +842,59 @@ function getSavedEstimates() {
   }
 }
 
+/* ── Export / Import Saves to/from File ── */
+
+function exportSavesToFile() {
+  const saved = getSavedEstimates();
+  if (saved.length === 0) {
+    showToast('No saved estimates to export.', 'warning');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(saved, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const date = new Date().toISOString().slice(0, 10);
+  a.download = `estimate-engine-backup-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${saved.length} estimates to file.`, 'success');
+}
+
+function importSavesFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) {
+        showToast('Invalid backup file — expected an array of estimates.', 'danger');
+        return;
+      }
+      // Merge with existing saves (imported ones take precedence by id)
+      const existing = getSavedEstimates();
+      const merged = [...imported];
+      for (const est of existing) {
+        if (!merged.find(s => s.id === est.id)) {
+          merged.push(est);
+        }
+      }
+      // Sort: newest first
+      merged.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+      localStorage.setItem('eldritch-estimates', JSON.stringify(merged));
+      showToast(`Imported ${imported.length} estimates${imported.length !== merged.length ? ' (merged with existing)' : ''}.`, 'success');
+      // Re-render both save and load lists if their modals are open
+      renderSavedList();
+      renderLoadList();
+    } catch (err) {
+      showToast('Failed to parse backup file. Make sure it\'s a valid JSON file.', 'danger');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
 function loadEstimate(id) {
   // Cancel any in-progress edit first
   if (editingItemId) cancelEdit();
@@ -1265,6 +1321,24 @@ function bindEvents() {
   dom.saveName.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') dom.modalSaveConfirm.click();
   });
+
+  // Export / Import saves to/from file
+  if (dom.btnExportSaves) {
+    dom.btnExportSaves.addEventListener('click', exportSavesToFile);
+  }
+  if (dom.btnImportSaves) {
+    dom.btnImportSaves.addEventListener('click', () => {
+      if (dom.fileInputSaves) dom.fileInputSaves.click();
+    });
+  }
+  if (dom.fileInputSaves) {
+    dom.fileInputSaves.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        importSavesFromFile(e.target.files[0]);
+      }
+      e.target.value = ''; // allow re-selecting the same file
+    });
+  }
 
   // ─── New Feature Bindings ───
 

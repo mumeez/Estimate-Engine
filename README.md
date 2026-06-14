@@ -57,9 +57,11 @@
   - **CMC** — California Mechanical Code
   - **CEC** — California Electrical Code
 
-### Export
+### Export & Backup
 - **Obsidian Markdown** — full project note with YAML frontmatter, materials table, labor, timeline, code refs, change orders
 - **Print / PDF** — browser-native print dialog with print-friendly formatting
+- **Save All to File** — download all saved estimates as a `.json` file (back them up to your Documents folder)
+- **Load from File** — import estimates from a `.json` backup file, merges with existing saves
 
 ---
 
@@ -199,6 +201,7 @@ The UI font is **CaskaydiaCove Nerd Font** (Cascadia Code–based, Nerd Font pat
 - [ ] Settings panel (default rates, tax, markup)
 - [ ] Theme picker (light / dark / custom)
 - [ ] Tauri desktop app wrapper
+- [x] File-based backup & restore (JSON export/import)
 - [ ] Cloud save / sync
 
 ---

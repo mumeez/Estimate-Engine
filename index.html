@@ -639,6 +639,10 @@
             <h4>Saved Estimates</h4>
             <div id="saved-estimates"></div>
           </div>
+          <div class="file-backup-row">
+            <button class="btn btn-sm" id="btn-export-saves" title="Download all estimates as a .json file">💾 Save All to File</button>
+            <span class="file-backup-hint">Backup all estimates as a .json file</span>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn" id="modal-cancel">Cancel</button>
@@ -654,6 +658,10 @@
           <div class="save-list" id="load-list">
             <div id="load-estimates"></div>
           </div>
+          <div class="file-backup-row">
+            <button class="btn btn-sm" id="btn-import-saves" title="Import estimates from a .json backup file">📂 Load from File</button>
+            <span class="file-backup-hint">Import estimates from a .json backup file</span>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="btn" id="load-modal-cancel">Cancel</button>
@@ -661,6 +669,9 @@
       </div>
       <!-- Calculators Modal is now an inline card in the right panel -->
     </div>
+
+    <!-- Hidden file input for importing saves -->
+    <input type="file" id="file-input-saves" accept=".json" style="display:none" />
   </div>
 
   <script src="app.js"></script>
