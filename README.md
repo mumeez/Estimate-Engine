@@ -95,7 +95,7 @@ The output will be at:
 
 No server needed — the app is fully self-contained.
 
-> **Tiling WM users (Niri / Hyprland / Sway):** The window is frameless (`decorations: false`) — no title bar, no minimize/maximize/close buttons. Your window manager handles window management with its own keybinds (e.g. Super+Q to close).
+> **Niri / Hyprland users:** The title bar is enabled for stability (required on some NVIDIA+Wayland setups). Since your window manager already manages windows with keyboard shortcuts, the title bar is purely cosmetic. If it really bothers you, set `"decorations": false` in `src-tauri/tauri.conf.json` — but be aware it may crash WebKitGTK on NVIDIA Wayland.
 
 **App launcher entry:** After building, run the install script to add it to your desktop applications:
 ```bash
