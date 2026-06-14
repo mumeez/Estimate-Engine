@@ -118,6 +118,7 @@ function cacheDom() {
   dom.btnSave = $('#btn-save');
   dom.btnLoad = $('#btn-load');
   dom.btnExport = $('#btn-export');
+  dom.btnPrintPreview = $('#btn-print-preview');
   dom.btnSaveQuick = $('#btn-save-quick');
   dom.btnExportQuick = $('#btn-export-quick');
   dom.btnReset = $('#btn-reset');
@@ -1021,13 +1022,259 @@ function renderLoadList() {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   EXPORT / PRINT
+   EXPORT / PRINT / PRINT PREVIEW
    ════════════════════════════════════════════════════════════════ */
 
-function exportPDF() {
+/* ════════════════════════════════════════════════════════════════
+   EXPORT / PRINT / PRINT PREVIEW
+   ════════════════════════════════════════════════════════════════ */
+
+/**
+ * Build a standalone HTML document of the estimate for export or preview.
+ * Returns { html, filename, projName }.
+ */
+function buildEstimateHTML() {
   updateSummary();
-  // Open print view
-  window.print();
+
+  const projName = state.projectName || 'Estimate';
+  const customer = state.customerName || '';
+  const estDate = state.date || new Date().toISOString().slice(0, 10);
+  const projectNotes = state.projectNotes || '';
+
+  // ── Build items table ──
+  let itemsRows = '';
+  let matBase = 0, matMarkup = 0, matWaste = 0;
+  for (const item of state.items) {
+    const c = calcItemTotal(item);
+    matBase += c.base;
+    matMarkup += c.markup;
+    matWaste += c.waste;
+    const cat = escapeHtml(item.category);
+    const name = escapeHtml(item.name);
+    const unit = escapeHtml(item.unit);
+    itemsRows += `<tr>
+      <td>${cat}</td>
+      <td>${name}</td>
+      <td class="c">${item.qty}</td>
+      <td class="c">${unit}</td>
+      <td class="r">$${item.unitPrice.toFixed(2)}</td>
+      <td class="r">$${c.total.toFixed(2)}</td>
+    </tr>`;
+  }
+  const hasItems = state.items.length > 0;
+
+  // ── Sub / Equip / Permits ──
+  let otherRows = '';
+  for (const s of state.subcontractors) {
+    otherRows += `<tr><td>Subcontractor</td><td>${escapeHtml(s.name)}</td><td class="r">$${s.cost.toFixed(2)}</td></tr>`;
+  }
+  for (const e of state.equipment) {
+    otherRows += `<tr><td>Equipment</td><td>${escapeHtml(e.name)}</td><td class="r">$${e.cost.toFixed(2)}</td></tr>`;
+  }
+  for (const p of state.permits) {
+    otherRows += `<tr><td>Permit/Fee</td><td>${escapeHtml(p.name)}</td><td class="r">$${p.cost.toFixed(2)}</td></tr>`;
+  }
+
+  // ── Figures ──
+  const matTotal = matBase + matMarkup + matWaste;
+  const laborCost = state.laborHours * state.hourlyRate;
+  const subTot = state.subcontractors.reduce((s, c) => s + c.cost, 0);
+  const equipTot = state.equipment.reduce((s, c) => s + c.cost, 0);
+  const permitTot = state.permits.reduce((s, c) => s + c.cost, 0);
+  const otherSum = subTot + equipTot + permitTot;
+  const overheadAmt = (matTotal + laborCost + otherSum) * (state.overheadPercent / 100);
+  const profitAmt = (matTotal + laborCost + otherSum + overheadAmt) * (state.profitPercent / 100);
+  const discountAmt = (matTotal + laborCost + otherSum + overheadAmt + profitAmt) * (state.discountPercent / 100);
+  const taxAmt = state.taxEnabled ? matTotal * (state.taxPercent / 100) : 0;
+  const grandTotal = (matTotal + laborCost + otherSum + overheadAmt + profitAmt) - discountAmt + taxAmt;
+
+  // ── Build the standalone HTML document ──
+  const safeName = projName.replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '') || 'Estimate';
+  const filename = `${safeName}_estimate.html`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${escapeHtml(projName)} — Estimate</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 12pt; line-height: 1.5; color: #1a1a1a;
+    background: #f5f5f0; padding: 20px;
+  }
+  .container {
+    max-width: 900px; margin: 0 auto;
+    background: #fff; border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.12);
+    padding: 40px 48px;
+  }
+  .toolbar {
+    text-align: center; margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 2px solid #e0e0e0;
+  }
+  .toolbar button {
+    font-size: 14px; padding: 10px 28px;
+    background: #1a73e8; color: #fff; border: none;
+    border-radius: 6px; cursor: pointer; font-weight: 600;
+    margin: 0 6px;
+  }
+  .toolbar button:hover { background: #1557b0; }
+  .toolbar button.secondary { background: #e8e8e8; color: #333; }
+  .toolbar button.secondary:hover { background: #d0d0d0; }
+  .toolbar .hint { font-size: 11px; color: #888; margin-top: 6px; }
+
+  h1 { font-size: 22pt; color: #111; margin-bottom: 4px; }
+  .subtitle { color: #555; margin-bottom: 20px; font-size: 11pt; }
+  .header-info { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+  .header-info > div { flex: 1; min-width: 140px; }
+  .header-info label { font-size: 8pt; text-transform: uppercase; letter-spacing: 0.5px; color: #888; }
+  .header-info .val { font-size: 11pt; color: #222; }
+
+  h2 { font-size: 14pt; color: #222; margin: 24px 0 8px; border-bottom: 2px solid #222; padding-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 10pt; }
+  th { text-align: left; padding: 8px 6px; font-size: 8pt; text-transform: uppercase;
+       letter-spacing: 0.5px; color: #666; border-bottom: 1px solid #ccc; }
+  td { padding: 7px 6px; border-bottom: 1px solid #eee; }
+  .c { text-align: center; }
+  .r { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: #f9f9f9; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+  .summary-line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 10pt; }
+  .summary-line.total { font-weight: 700; border-top: 2px solid #222; margin-top: 4px; padding-top: 6px; font-size: 11pt; }
+  .summary-line.grand { font-weight: 700; font-size: 13pt; border-top: 2px solid #111; margin-top: 6px; padding-top: 8px; }
+  .summary-label { color: #444; }
+  .summary-value { font-variant-numeric: tabular-nums; }
+
+  .notes-section { margin-top: 24px; padding: 12px 16px; background: #f9f9f5;
+                   border-left: 3px solid #d4d4d4; border-radius: 4px; font-size: 10pt; color: #444; }
+  .notes-section strong { color: #222; }
+
+  .footer { text-align: center; margin-top: 32px; font-size: 9pt; color: #999;
+            border-top: 1px solid #ddd; padding-top: 12px; }
+  .empty-msg { text-align: center; padding: 32px; color: #999; font-style: italic; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .container { box-shadow: none; padding: 0; border-radius: 0; }
+    .toolbar { display: none; }
+    .footer { page-break-after: always; }
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    h2 { page-break-before: auto; page-break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="toolbar">
+    <button onclick="window.print()">🖨 Print / Save as PDF</button>
+    <button class="secondary" onclick="window.close()">Close</button>
+    <div class="hint">Press ⌘P (Mac) or Ctrl+P (Windows) to print or save as PDF</div>
+  </div>
+
+  <h1>${escapeHtml(projName)}</h1>
+  <div class="subtitle">${customer ? 'Prepared for ' + escapeHtml(customer) : ''}</div>
+
+  <div class="header-info">
+    <div><label>Date</label><div class="val">${escapeHtml(estDate)}</div></div>
+    <div><label>Estimate #</label><div class="val">${state.id || '—'}</div></div>
+    <div><label>Status</label><div class="val">${(state.projectStatus || 'estimating').charAt(0).toUpperCase() + (state.projectStatus || 'estimating').slice(1)}</div></div>
+    ${state.crewSize ? `<div><label>Crew Size</label><div class="val">${state.crewSize} workers</div></div>` : ''}
+    ${state.projectDuration ? `<div><label>Duration</label><div class="val">${state.projectDuration} days</div></div>` : ''}
+  </div>
+
+  ${projectNotes ? `<div class="notes-section"><strong>Scope of Work</strong><br>${escapeHtml(projectNotes)}</div>` : ''}
+
+  <h2>Materials &amp; Labor Items</h2>
+  ${hasItems ? `
+  <table>
+    <thead>
+      <tr><th>Category</th><th>Item</th><th class="c">Qty</th><th class="c">Unit</th><th class="r">Unit Price</th><th class="r">Total</th></tr>
+    </thead>
+    <tbody>${itemsRows}</tbody>
+  </table>` : '<div class="empty-msg">No items added</div>'}
+
+  ${otherRows ? `<h2>Other Costs</h2>
+  <table>
+    <thead><tr><th>Type</th><th>Detail</th><th class="r">Amount</th></tr></thead>
+    <tbody>${otherRows}</tbody>
+  </table>` : ''}
+
+  <h2>Estimate Summary</h2>
+  <div class="summary-grid">
+    <div class="summary-col">
+      <div class="summary-line"><span class="summary-label">Materials Subtotal</span><span class="summary-value">$${matBase.toFixed(2)}</span></div>
+      <div class="summary-line"><span class="summary-label">Material Markup (${state.markupPercent}%)</span><span class="summary-value">$${matMarkup.toFixed(2)}</span></div>
+      ${state.advancedMode ? `<div class="summary-line"><span class="summary-label">Waste (${state.wastePercent}%)</span><span class="summary-value">$${matWaste.toFixed(2)}</span></div>` : ''}
+      <div class="summary-line total"><span class="summary-label">Total Materials</span><span class="summary-value">$${matTotal.toFixed(2)}</span></div>
+      <div class="summary-line"><span class="summary-label">Labor (${state.laborHours} hrs × $${state.hourlyRate}/hr)</span><span class="summary-value">$${laborCost.toFixed(2)}</span></div>
+    </div>
+    <div class="summary-col">
+      ${state.discountPercent > 0 ? `<div class="summary-line"><span class="summary-label">Discount (${state.discountPercent}%)</span><span class="summary-value">-$${discountAmt.toFixed(2)}</span></div>` : ''}
+      ${state.taxEnabled ? `<div class="summary-line"><span class="summary-label">Tax (${state.taxPercent}%)</span><span class="summary-value">$${taxAmt.toFixed(2)}</span></div>` : ''}
+      ${otherSum > 0 ? `<div class="summary-line"><span class="summary-label">Subs / Equip / Permits</span><span class="summary-value">$${otherSum.toFixed(2)}</span></div>` : ''}
+      ${state.overheadPercent > 0 ? `<div class="summary-line"><span class="summary-label">Overhead (${state.overheadPercent}%)</span><span class="summary-value">$${overheadAmt.toFixed(2)}</span></div>` : ''}
+      ${state.profitPercent > 0 ? `<div class="summary-line"><span class="summary-label">Profit Margin (${state.profitPercent}%)</span><span class="summary-value">$${profitAmt.toFixed(2)}</span></div>` : ''}
+      <div class="summary-line grand"><span class="summary-label">Grand Total</span><span class="summary-value">$${grandTotal.toFixed(2)}</span></div>
+    </div>
+  </div>
+
+  ${state.notes ? `<div class="notes-section"><strong>Notes</strong><br>${escapeHtml(state.notes)}</div>` : ''}
+
+  <div class="footer">Generated by Estimate Engine on ${new Date().toLocaleString()}</div>
+</div>
+</body>
+</html>`;
+
+  return { html, filename, projName: safeName };
+}
+
+/**
+ * Export the estimate as a downloadable HTML file.
+ * Works in both browser and Tauri — lets you save the file anywhere,
+ * then open in any browser to view, print, or email.
+ */
+async function exportPDF() {
+  const { html, filename } = buildEstimateHTML();
+  try {
+    const saved = await tauriSaveFile(filename, html, 'text/html');
+    if (saved) {
+      showToast(`✅ Estimate saved: ${filename}`, 'success');
+    }
+  } catch (e) {
+    // Fallback: direct download
+    console.warn('Tauri save failed, using browser download:', e);
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(`✅ Estimate exported: ${filename}`, 'success');
+  }
+}
+
+/**
+ * Open a formatted Print Preview window that shows exactly how
+ * the estimate will look on paper.
+ */
+function printPreview() {
+  const { html } = buildEstimateHTML();
+  const pw = window.open('', 'estimatePrintPreview', 'width=960,height=720,scrollbars=yes,resizable=yes');
+  if (!pw) {
+    showToast('⚠ Print Preview blocked. Please allow popups for this site, or use the Export button instead.', 'warning');
+    return;
+  }
+  pw.document.write(html);
+  pw.document.close();
+  pw.focus();
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1298,6 +1545,7 @@ function bindEvents() {
   dom.btnSaveQuick.addEventListener('click', () => showModal('save'));
   dom.btnLoad.addEventListener('click', () => showModal('load'));
   dom.btnExport.addEventListener('click', exportPDF);
+  dom.btnPrintPreview.addEventListener('click', printPreview);
   dom.btnExportQuick.addEventListener('click', exportPDF);
 
   // Modal

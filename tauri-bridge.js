@@ -11,9 +11,16 @@ async function tauriSaveFile(defaultName, contents, mimeType) {
   if (isTauri()) {
     const { save } = await import('@tauri-apps/plugin-dialog');
     const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+    const ext = defaultName.split('.').pop() || 'html';
+    const filters = [
+      { name: 'HTML file', extensions: ['html', 'htm'] },
+      { name: 'Markdown', extensions: ['md'] },
+      { name: 'JSON', extensions: ['json'] },
+      { name: 'All files', extensions: ['*'] },
+    ];
     const path = await save({
       defaultPath: defaultName,
-      filters: [{ name: 'Documents', extensions: [mimeType === 'application/json' ? 'json' : 'md'] }],
+      filters,
     });
     if (path) {
       await writeTextFile(path, contents);
