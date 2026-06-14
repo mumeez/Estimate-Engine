@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "dev": "python3 -m http.server 8080",
-    "build:dist": "mkdir -p dist && cp index.html styles.css app.js tauri-bridge.js dist/ && cp -r data obsidian-template.md screenshot.png dist/ 2>/dev/null; true",
+    "build:dist": "rm -rf dist && mkdir -p dist && cp index.html styles.css app.js tauri-bridge.js dist/ && cp -r data obsidian-template.md screenshot.png dist/ 2>/dev/null; true",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
