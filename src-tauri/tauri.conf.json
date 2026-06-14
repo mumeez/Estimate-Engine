@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "identifier": "com.mumeez.estimate-engine",
   "build": {
-    "frontendDist": "..",
+    "frontendDist": "../dist",
     "devUrl": "http://localhost:8080",
     "beforeDevCommand": "",
-    "beforeBuildCommand": ""
+    "beforeBuildCommand": "npm run build:dist"
   },
   "app": {
     "windows": [
