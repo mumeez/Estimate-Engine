@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estimate Engine — Construction & Remodel</title>
-  <link rel="stylesheet" href="styles.css?v=8" />
+  <link rel="stylesheet" href="styles.css?v=9" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
@@ -106,6 +106,16 @@
           </div>
           <div class="card-body">
             <textarea id="project-notes" rows="5" placeholder="Scope of work, special conditions, exclusions, notes to client...&#10;&#10;Tip: You can use markdown-like formatting here. This content will be included in the Obsidian export."></textarea>
+            <div class="attachment-area">
+              <div class="attachment-header">
+                <label>Attachments</label>
+                <button type="button" class="btn btn-sm" id="btn-add-attachment">+ Add File</button>
+                <input type="file" id="attachment-input" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" hidden />
+              </div>
+              <div id="attachment-grid">
+                <div class="attachment-empty">No attachments yet</div>
+              </div>
+            </div>
             <div class="form-row" style="margin-top:6px;">
               <div class="form-group form-group-full">
                 <label for="project-status">Project Status</label>
@@ -681,6 +691,7 @@
     <input type="file" id="file-input-saves" accept=".json" style="display:none" />
   </div>
 
-  <script src="app.js?v=9"></script>
+  <script src="tauri-bridge.js?v=2"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

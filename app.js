@@ -26,6 +26,7 @@ let state = {
   taxEnabled: false,
   taxPercent: 7,
   advancedMode: false,
+  attachments: [],       // [{id, name, type, data, size}, ...]
 };
 
 let materials = {};       // { category: [{name, price, unit}, ...] }
@@ -157,6 +158,9 @@ function cacheDom() {
   dom.btnExportSaves = $('#btn-export-saves');
   dom.btnImportSaves = $('#btn-import-saves');
   dom.fileInputSaves = $('#file-input-saves');
+  dom.btnAddAttachment = $('#btn-add-attachment');
+  dom.attachmentInput = $('#attachment-input');
+  dom.attachmentGrid = $('#attachment-grid');
 }
 
 /* ─── UUID Generator ─── */
@@ -901,7 +905,7 @@ function loadEstimate(id) {
     'overheadPercent', 'profitPercent', 'discountPercent',
     'taxEnabled', 'taxPercent', 'advancedMode',
     'projectNotes', 'projectStatus', 'crewSize', 'projectDuration', 'projectStart', 'crewNotes',
-    'changeOrders'];
+    'changeOrders', 'attachments'];
   for (const f of fields) {
     if (data[f] !== undefined) state[f] = data[f];
   }
@@ -950,6 +954,7 @@ function syncStateToUI() {
   renderEquip();
   renderPermits();
   renderChangeOrders();
+  renderAttachments();
   updateSummary();
 }
 
@@ -1336,6 +1341,16 @@ function bindEvents() {
   if (dom.projectNotes) {
     dom.projectNotes.addEventListener('input', () => { state.projectNotes = dom.projectNotes.value; });
   }
+
+  // Attachments
+  if (dom.btnAddAttachment) {
+    dom.btnAddAttachment.addEventListener('click', () => {
+      if (dom.attachmentInput) dom.attachmentInput.click();
+    });
+  }
+  if (dom.attachmentInput) {
+    dom.attachmentInput.addEventListener('change', handleAttachmentFiles);
+  }
   if (dom.projectStatus) {
     dom.projectStatus.addEventListener('change', () => { state.projectStatus = dom.projectStatus.value; });
   }
@@ -1448,6 +1463,69 @@ function renderChangeOrders() {
 }
 
 /* ════════════════════════════════════════════════════════════════
+   ATTACHMENTS (files & photos)
+   ════════════════════════════════════════════════════════════════ */
+
+function handleAttachmentFiles(e) {
+  const files = e.target.files;
+  if (!files || !files.length) return;
+  for (const file of files) {
+    if (file.size > 10 * 1024 * 1024) {
+      showToast(`"${file.name}" is too large (max 10 MB). Skipped.`, 'warning');
+      continue;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      state.attachments.push({
+        id: uid(),
+        name: file.name,
+        type: file.type,
+        data: ev.target.result,
+        size: file.size,
+      });
+      renderAttachments();
+      showToast(`Attached: ${file.name}`, 'success');
+    };
+    reader.readAsDataURL(file);
+  }
+  // Reset so the same file can be re-selected
+  e.target.value = '';
+}
+
+function renderAttachments() {
+  if (!dom.attachmentGrid) return;
+  if (!state.attachments || state.attachments.length === 0) {
+    dom.attachmentGrid.innerHTML = '<div class="attachment-empty">No attachments yet</div>';
+    return;
+  }
+  dom.attachmentGrid.innerHTML = state.attachments.map(a => {
+    const isImage = a.type && a.type.startsWith('image/');
+    return `<div class="attachment-item" data-id="${escapeAttr(a.id)}">
+      ${isImage
+        ? `<div class="attachment-preview"><img src="${escapeAttr(a.data)}" alt="${escapeAttr(a.name)}" loading="lazy" /></div>`
+        : `<div class="attachment-preview attachment-file-icon">📄</div>`
+      }
+      <div class="attachment-info">
+        <span class="attachment-name" title="${escapeAttr(a.name)}">${escapeHtml(a.name)}</span>
+        <span class="attachment-size">${formatFileSize(a.size)}</span>
+      </div>
+      <button class="btn-icon attachment-remove" onclick="removeAttachment('${a.id}')" title="Remove attachment">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function removeAttachment(id) {
+  state.attachments = (state.attachments || []).filter(a => a.id !== id);
+  renderAttachments();
+}
+
+/* ════════════════════════════════════════════════════════════════
    OBSIDIAN EXPORT
    ════════════════════════════════════════════════════════════════ */
 
@@ -1498,6 +1576,23 @@ function exportToObsidian() {
   const totalMaterials = matTotal + markupAmt;
   const grandTotal = totalMaterials + laborCost + subTotal + (state.taxEnabled ? totalMaterials * (state.taxPercent / 100) : 0);
 
+  // Build attachments section for export
+  let attachmentsYaml = '';
+  let attachmentsSection = '';
+  if (state.attachments && state.attachments.length > 0) {
+    const names = state.attachments.map(a => escapeMd(a.name));
+    attachmentsYaml = `\nattachments:\n${names.map(n => `  - "${n}"`).join('\n')}`;
+    const isImage = (a) => a.type && a.type.startsWith('image/');
+    attachmentsSection = `\n---\n\n## 📎 Attachments\n\n`;
+    for (const a of state.attachments) {
+      if (isImage(a)) {
+        attachmentsSection += `![${escapeMd(a.name)}](${a.data})\n\n`;
+      } else {
+        attachmentsSection += `- ${escapeMd(a.name)} (${formatFileSize(a.size)})\n`;
+      }
+    }
+  }
+
   const template = `---
 type: construction-project
 status: ${state.projectStatus || 'estimating'}
@@ -1510,7 +1605,7 @@ timeline-start: ${state.projectStart || ''}
 timeline-end: 
 crew-size: ${state.crewSize || 1}
 budget-estimate: ${grandTotal.toFixed(2)}
-budget-actual: 
+budget-actual: ${attachmentsYaml}
 tags:
   - construction
   - estimate
@@ -1597,6 +1692,12 @@ ${coMd || '| | *No change orders* | | |'}
 | Trade | Amount | License |
 |-------|--------|---------|
 ${subMd || '| *None listed* | | |'}
+
+---
+
+## 📎 Attachments
+
+${attachmentsSection || '*No attachments.*'}
 
 ---
 

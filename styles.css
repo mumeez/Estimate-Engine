@@ -1307,6 +1307,104 @@ td.td-actions { text-align: center; }
   to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
 
+/* ─── ATTACHMENTS ─── */
+.attachment-area {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.attachment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.attachment-header label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#attachment-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.attachment-empty {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-style: italic;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  position: relative;
+  max-width: 220px;
+}
+
+.attachment-preview {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  font-size: 1.1rem;
+}
+
+.attachment-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attachment-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.attachment-name {
+  font-size: 0.7rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.attachment-size {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+.attachment-remove {
+  font-size: 0.6rem !important;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.attachment-remove:hover {
+  opacity: 1;
+}
+
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
   #main-content {
@@ -1355,7 +1453,9 @@ td.td-actions { text-align: center; }
   .btn-icon-edit,
   .add-btn-group,
   #btn-cancel-edit,
-  #btn-add-item {
+  #btn-add-item,
+  #btn-add-attachment,
+  .attachment-remove {
     display: none !important;
   }
 

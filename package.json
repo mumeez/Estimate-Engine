@@ -1,0 +1,33 @@
+{
+  "name": "estimate-engine",
+  "version": "1.0.0",
+  "description": "> A construction & remodel estimating tool with an animated background, inline calculators, California code search, and Obsidian export.",
+  "main": "app.js",
+  "scripts": {
+    "dev": "python3 -m http.server 8080",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mumeez/Estimate-Engine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mumeez/Estimate-Engine/issues"
+  },
+  "homepage": "https://github.com/mumeez/Estimate-Engine#readme",
+  "devDependencies": {
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/cli": "^2.11.2"
+  },
+  "dependencies": {
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-fs": "^2.5.1",
+    "@tauri-apps/plugin-opener": "^2.5.4"
+  }
+}

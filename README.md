@@ -1,6 +1,6 @@
 # Estimate Engine
 
-> A construction & remodel estimating tool with an animated background, inline calculators, California code search, and Obsidian export.
+> A construction & remodel estimating tool with an animated background, inline calculators, photo attachments, California code search, and Obsidian export.
 
 ---
 
@@ -10,12 +10,13 @@
 - **Auto-fill Materials** — search and add items from the built-in catalog
 - **Edit or Remove Items** — edit any line item or delete it
 - **Inline Calculators** — basic arithmetic + drywall, concrete, lumber, paint, flooring calculators in the right panel (no modals)
+- **Photo & File Attachments** — attach images, PDFs, and documents to project notes (stored as data URLs, included in Obsidian export)
 - **Change Orders** — track, approve, reject, with automatic grand total updates
 - **Project Management** — notes, status, crew & timeline tracking
 - **Code Search** — search 78 California building code references (CRC, CBC, CALGreen, CEBC, CPC, CMC, CEC)
 - **Save / Load** — all estimates stored in your browser's localStorage
 - **File Backup & Restore** — export all estimates as `.json` and import them later
-- **Obsidian Export** — full project note with YAML frontmatter, materials table, labor, code refs, change orders
+- **Obsidian Export** — full project note with YAML frontmatter, materials table, labor, code refs, change orders, and embedded attachments
 - **Print / PDF** — browser-native print with print-friendly formatting
 - **5 Color Themes** — default (eldritch), rosépine, gruvbox, dracula, e-ink light
 - **Animated Background** — perlin-flow particle animation (color adapts to theme)
@@ -31,7 +32,7 @@
 
 No build tools, no npm install, no server-side runtime required.
 
-### Installation
+### Run in Browser
 
 #### macOS / Linux (Python — pre-installed)
 
@@ -55,9 +56,7 @@ python -m http.server 8080
 
 Open **http://localhost:8080** in your browser.
 
-#### Any OS (backup option — Node.js)
-
-If you have Node.js installed:
+#### Any OS (backup — Node.js)
 
 ```bash
 git clone https://github.com/mumeez/Estimate-Engine.git
@@ -69,6 +68,32 @@ Then open the URL shown in the terminal (usually **http://localhost:3000** or **
 
 ---
 
+### Build as Desktop App (optional)
+
+You can wrap Estimate Engine as a standalone desktop app using [Tauri](https://v2.tauri.app/). The result is a single executable that opens in its own window — no browser, no terminal needed.
+
+**Prerequisites:**
+- Rust (install via `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`)
+- Linux: `sudo pacman -S webkit2gtk-4.1` (Arch) or `sudo apt install libwebkit2gtk-4.1-dev` (Debian/Ubuntu)
+- macOS: `xcode-select --install`
+- Windows: Microsoft C++ Build Tools + WebView2
+
+**Build:**
+```bash
+cd Estimate-Engine
+npm install
+npx tauri build
+```
+
+The output will be at:
+- **Linux:** `src-tauri/target/release/bundle/appimage/` (`.AppImage`)
+- **macOS:** `src-tauri/target/release/bundle/dmg/` (`.dmg`)
+- **Windows:** `src-tauri/target/release/bundle/msi/` (`.msi`)
+
+No server needed — the app is fully self-contained.
+
+---
+
 ### Optional Dependencies
 
 These aren't required to run the app, but unlock extra features:
@@ -77,7 +102,7 @@ These aren't required to run the app, but unlock extra features:
 |------------|-------------------|----------------|
 | **CaskaydiaCove Nerd Font** | The UI is designed for this font (Cascadia Code–based with Nerd Font patches). Without it, the browser falls back to `monospace` — still works, just less polished. | Download from [Nerd Fonts](https://www.nerdfonts.com/font-downloads) and install it on your system. On macOS, double-click the `.ttf` files and click "Install Font". On Linux, copy them to `~/.local/share/fonts/` and run `fc-cache`. On Windows, right-click → Install. |
 | **Obsidian** | The "Export to Obsidian" button generates a markdown file you can save directly into an Obsidian vault. | Download from [obsidian.md](https://obsidian.md) |
-| **VS Code + Live Server** | An alternative way to run the app if you prefer editing in VS Code and want auto-refresh. | Install the [Live Server extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) (Ritwick Dey), open the project folder, right-click `index.html` → "Open with Live Server". |
+| **Rust + Tauri** | Build a standalone desktop app from the web version. | See "Build as Desktop App" section above. |
 
 ---
 
@@ -88,10 +113,19 @@ Estimate-Engine/
 ├── index.html             # Main application layout
 ├── styles.css             # Theme & styling (5 themes)
 ├── app.js                 # Application logic
+├── tauri-bridge.js        # Tauri native file operations (optional)
 ├── data/
 │   ├── materials.json     # 200+ construction items
 │   └── ca-codes.json      # 78 California building code references
 ├── obsidian-template.md   # Obsidian export template
+├── src-tauri/             # Tauri desktop app wrapper (optional)
+│   ├── Cargo.toml         # Rust dependencies
+│   ├── tauri.conf.json    # App configuration
+│   ├── capabilities/      # Security permissions
+│   ├── icons/             # App icons
+│   └── src/
+│       ├── main.rs        # Entry point
+│       └── lib.rs         # Rust backend (file I/O commands)
 ├── screenshot.png
 ├── README.md
 └── .gitignore
@@ -118,6 +152,7 @@ All color variables are in `styles.css` under `:root`. The app includes 5 built-
 - **Vanilla JavaScript** — no frameworks, no build step, no dependencies
 - **Canvas API** — perlin-flow animated background
 - **localStorage** — all data stays in your browser (no server, no database)
+- **Rust + Tauri** (optional) — desktop app wrapper with native file dialogs
 
 ---
 
@@ -130,16 +165,16 @@ All color variables are in `styles.css` under `:root`. The app includes 5 built-
 - [x] Basic arithmetic calculator (inline in right panel)
 - [x] Change orders
 - [x] Project notes, status, crew & timeline
+- [x] Photo & file attachments
 - [x] California building code search
-- [x] Obsidian markdown export
+- [x] Obsidian markdown export (with embedded attachments)
 - [x] Animated perlin-flow background
 - [x] 5 color themes (eldritch / rosépine / gruvbox / dracula / e-ink)
 - [x] Print-friendly CSS for PDF output
 - [x] Edit existing line items
 - [x] File-based backup & restore (JSON export/import)
-- [ ] PWA manifest for installable app
+- [x] Tauri desktop app wrapper
 - [ ] Settings panel (default rates, tax, markup)
-- [ ] Tauri desktop app wrapper
 - [ ] Cloud save / sync
 
 ---
