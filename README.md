@@ -72,7 +72,7 @@ Then open the URL shown in the terminal (usually **http://localhost:3000** or **
 
 You can wrap Estimate Engine as a standalone desktop app using [Tauri](https://v2.tauri.app/). The result is a single executable that opens in its own window — no browser, no terminal needed.
 
-The first build compiles all of Tauri's Rust dependencies — expect **15–30 minutes** on the first run. After that, rebuilds are seconds.
+The first build compiles all of Tauri's Rust dependencies and takes roughly **2–5 minutes** on modern hardware. After that, rebuilds are about 30 seconds.
 
 #### macOS
 
