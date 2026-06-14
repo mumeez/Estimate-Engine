@@ -1116,7 +1116,6 @@ td.td-actions { text-align: center; }
   height: 100vh;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.85;
 }
 
 /* ─── ANIMATIONS ─── */

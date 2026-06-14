@@ -1,100 +1,63 @@
 # Estimate Engine
 
-> A construction & remodel estimating tool with an eldritch-themed UI, animated background, Home Depot pricing database, and California building code search.
-
-![Screenshot](screenshot.png)
+> A construction & remodel estimating tool with an animated background, inline calculators, California code search, and Obsidian export.
 
 ---
 
 ## Features
 
-### Core
-- **Materials Database** — 200+ construction items across 14 categories with realistic Home Depot prices
+- **Materials Database** — 200+ construction items across 14 categories with realistic pricing
 - **Auto-fill Materials** — search and add items from the built-in catalog
-- **Edit or Remove Items** — edit any material line item after adding it, or delete it with one click
-- **Hourly Rate Slider** — $15–$250/hr with fine control
-- **Tax Toggle** — enable/disable tax on materials
-- **Material Markup** — percentage markup on all materials
-- **Discount** — apply a percentage discount to the total
-- **Simple / Advanced Toggle** — hides or shows pro features
-
-### Advanced Mode
-- Overhead % and Profit Margin %
-- Subcontractors with license number tracking
-- Equipment rental costs
-- Permits & fees
-- Waste factor on materials
-- Per-item markup & labor category assignment
-
-### Calculators (Inline in Right Panel)
-- **Basic Calculator** — full arithmetic calculator (+, −, ×, ÷, %, ±) always available
-- **Drywall** — sheets, mud, tape, screws
-- **Concrete** — volume in yards, bag count
-- **Lumber** — board feet calculations
-- **Paint** — gallons needed by wall area
-- **Flooring** — sq ft with waste factor
-- Switch between calculators with tabs — no modal popups
-- Each construction calculator can auto-add results to your estimate with one click
-
-### Change Orders
-- Add, approve, reject, or delete change orders
-- Each change order updates the grand total
-- Track by date, description, and amount
-
-### Project Management
-- Project notes with free text
-- Status dropdown (Estimating → Proposal Sent → Active → Change Order → Completed)
-- Crew & timeline tracking (crew size, start/end dates)
-- Save / load estimates from browser storage
-
-### Code Search
-- Search 78 California building code references across:
-  - **CRC** — California Residential Code
-  - **CBC** — California Building Code
-  - **CALGreen** — California Green Building Standards
-  - **CEBC** — California Existing Building Code
-  - **CPC** — California Plumbing Code
-  - **CMC** — California Mechanical Code
-  - **CEC** — California Electrical Code
-
-### Export & Backup
-- **Obsidian Markdown** — full project note with YAML frontmatter, materials table, labor, timeline, code refs, change orders
-- **Print / PDF** — browser-native print dialog with print-friendly formatting
-- **Save All to File** — download all saved estimates as a `.json` file (back them up to your Documents folder)
-- **Load from File** — import estimates from a `.json` backup file, merges with existing saves
+- **Edit or Remove Items** — edit any line item or delete it
+- **Inline Calculators** — basic arithmetic + drywall, concrete, lumber, paint, flooring calculators in the right panel (no modals)
+- **Change Orders** — track, approve, reject, with automatic grand total updates
+- **Project Management** — notes, status, crew & timeline tracking
+- **Code Search** — search 78 California building code references (CRC, CBC, CALGreen, CEBC, CPC, CMC, CEC)
+- **Save / Load** — all estimates stored in your browser's localStorage
+- **File Backup & Restore** — export all estimates as `.json` and import them later
+- **Obsidian Export** — full project note with YAML frontmatter, materials table, labor, code refs, change orders
+- **Print / PDF** — browser-native print with print-friendly formatting
+- **5 Color Themes** — default (eldritch), rosépine, gruvbox, dracula, e-ink light
+- **Animated Background** — perlin-flow particle animation (color adapts to theme)
 
 ---
 
 ## Getting Started
 
-### Prerequisites
+### What You'll Need
 
-You only need two things:
-1. **A modern web browser** — Chrome, Firefox, Safari, or Edge (any recent version)
-2. **A way to serve static files locally** — pick one of the options below
+1. **A web browser** — Chrome, Firefox, Safari, or Edge
+2. **A way to serve the files locally** — pick one option below
 
 No build tools, no npm install, no server-side runtime required.
 
-### Option A: Python (pre-installed on macOS & most Linux)
+### Installation
 
-Python comes with a built-in HTTP server — no extra install needed.
+#### macOS / Linux (Python — pre-installed)
 
 ```bash
-# Clone the repo
 git clone https://github.com/mumeez/Estimate-Engine.git
 cd Estimate-Engine
-
-# Start the server
 python3 -m http.server 8080
 ```
 
-Then open **http://localhost:8080** in your browser.
+Open **http://localhost:8080** in your browser.
 
-> **Windows note:** Use `python -m http.server 8080` instead of `python3`. If Python isn't installed, download it from [python.org](https://python.org) or the Microsoft Store.
+#### Windows
 
-### Option B: Node.js / npx (macOS, Linux, Windows)
+```bash
+git clone https://github.com/mumeez/Estimate-Engine.git
+cd Estimate-Engine
+python -m http.server 8080
+```
 
-If you have Node.js installed, you can use `npx serve` — no global install needed:
+> If Python isn't installed, download it from [python.org](https://python.org) or the Microsoft Store.
+
+Open **http://localhost:8080** in your browser.
+
+#### Any OS (backup option — Node.js)
+
+If you have Node.js installed:
 
 ```bash
 git clone https://github.com/mumeez/Estimate-Engine.git
@@ -104,37 +67,17 @@ npx serve .
 
 Then open the URL shown in the terminal (usually **http://localhost:3000** or **http://localhost:5000**).
 
-### Option C: VS Code Live Server (Windows, macOS, Linux)
+---
 
-If you use Visual Studio Code:
+### Optional Dependencies
 
-1. Install the **Live Server** extension (by Ritwick Dey)
-2. Open the `Estimate-Engine` folder in VS Code
-3. Right-click `index.html` → **Open with Live Server**
-4. A browser tab opens automatically
+These aren't required to run the app, but unlock extra features:
 
-### Option D: PHP (macOS, Linux, Windows)
-
-If you have PHP installed:
-
-```bash
-git clone https://github.com/mumeez/Estimate-Engine.git
-cd Estimate-Engine
-php -S localhost:8080
-```
-
-### Quick Start (already have the files?)
-
-If you already downloaded or cloned the project, just serve the folder:
-
-| Platform | Command |
-|----------|---------|
-| **macOS / Linux** | `python3 -m http.server 8080` |
-| **Windows (PowerShell)** | `python -m http.server 8080` |
-| **Any (with Node.js)** | `npx serve .` |
-| **Any (with PHP)** | `php -S localhost:8080` |
-
-Then open **http://localhost:8080** in your browser.
+| Dependency | Why You'd Want It | How to Install |
+|------------|-------------------|----------------|
+| **CaskaydiaCove Nerd Font** | The UI is designed for this font (Cascadia Code–based with Nerd Font patches). Without it, the browser falls back to `monospace` — still works, just less polished. | Download from [Nerd Fonts](https://www.nerdfonts.com/font-downloads) and install it on your system. On macOS, double-click the `.ttf` files and click "Install Font". On Linux, copy them to `~/.local/share/fonts/` and run `fc-cache`. On Windows, right-click → Install. |
+| **Obsidian** | The "Export to Obsidian" button generates a markdown file you can save directly into an Obsidian vault. | Download from [obsidian.md](https://obsidian.md) |
+| **VS Code + Live Server** | An alternative way to run the app if you prefer editing in VS Code and want auto-refresh. | Install the [Live Server extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) (Ritwick Dey), open the project folder, right-click `index.html` → "Open with Live Server". |
 
 ---
 
@@ -143,14 +86,14 @@ Then open **http://localhost:8080** in your browser.
 ```
 Estimate-Engine/
 ├── index.html             # Main application layout
-├── styles.css             # Theme & styling
+├── styles.css             # Theme & styling (5 themes)
 ├── app.js                 # Application logic
 ├── data/
-│   ├── materials.json     # 200+ construction items with HD pricing
+│   ├── materials.json     # 200+ construction items
 │   └── ca-codes.json      # 78 California building code references
 ├── obsidian-template.md   # Obsidian export template
-├── screenshot.png         # App screenshot for the README
-├── README.md              # This file
+├── screenshot.png
+├── README.md
 └── .gitignore
 ```
 
@@ -158,26 +101,23 @@ Estimate-Engine/
 
 ## Customization
 
-All color variables are in `styles.css` under `:root`. The app uses a customizable theme system:
+All color variables are in `styles.css` under `:root`. The app includes 5 built-in themes you can switch from the header:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `--bg-deep` | `#363748` | Far background |
 | `--bg-surface` | `#404262` | Card surfaces |
-| `--accent` | `#BC93FA` | Headers & purple accent |
+| `--accent` | `#BC93FA` | Purple accent |
 | `--text-primary` | `#33ff66` | Green body text |
-
-The UI font is **CaskaydiaCove Nerd Font** (Cascadia Code–based, Nerd Font patched). If you don't have it installed, the browser falls back to `monospace`.
 
 ---
 
 ## Tech Stack
 
-- **HTML5** — semantic layout
-- **CSS3** — custom properties, flexbox, canvas animations
+- **HTML5 / CSS3** — semantic layout, custom properties, flexbox
 - **Vanilla JavaScript** — no frameworks, no build step, no dependencies
-- **Canvas API** — particle background with stars, connector lines, drifting glyphs
-- **localStorage** — all estimates are saved in your browser (no server, no database)
+- **Canvas API** — perlin-flow animated background
+- **localStorage** — all data stays in your browser (no server, no database)
 
 ---
 
@@ -192,16 +132,14 @@ The UI font is **CaskaydiaCove Nerd Font** (Cascadia Code–based, Nerd Font pat
 - [x] Project notes, status, crew & timeline
 - [x] California building code search
 - [x] Obsidian markdown export
-- [x] Canvas particle background
-- [x] Custom theming (eldritch palette)
+- [x] Animated perlin-flow background
+- [x] 5 color themes (eldritch / rosépine / gruvbox / dracula / e-ink)
 - [x] Print-friendly CSS for PDF output
 - [x] Edit existing line items
-- [ ] Home Depot live API pricing (requires API key)
+- [x] File-based backup & restore (JSON export/import)
 - [ ] PWA manifest for installable app
 - [ ] Settings panel (default rates, tax, markup)
-- [ ] Theme picker (light / dark / custom)
 - [ ] Tauri desktop app wrapper
-- [x] File-based backup & restore (JSON export/import)
 - [ ] Cloud save / sync
 
 ---

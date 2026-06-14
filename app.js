@@ -40,6 +40,19 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 const dom = {};
 
+/* ─── Startup guard — ensure init runs even if DOMContentLoaded already fired ─── */
+let _appStarted = false;
+async function safeInit() {
+  if (_appStarted) return;
+  _appStarted = true;
+  try {
+    await init();
+  } catch (e) {
+    console.error('Init error:', e);
+    showToast('✖ Error: ' + e.message, 'danger');
+  }
+}
+
 function cacheDom() {
   dom.projectName = $('#project-name');
   dom.customerName = $('#customer-name');
@@ -167,263 +180,109 @@ const DEFAULT_STATE_EXTRA = {
 class ParticleBackground {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
-    if (!this.canvas) return;
+    if (!this.canvas) { console.warn('ParticleBackground: canvas not found'); return; }
     this.ctx = this.canvas.getContext('2d');
+    if (!this.ctx) { console.warn('ParticleBackground: 2d context not available'); return; }
     this.particles = [];
-    this.glyphs = [];
-    this.stars = [];
-    this.orbs = [];
-    this.mouseX = 0;
-    this.mouseY = 0;
-    this.time = 0;
+    this.t = 0;
     this.resize();
-    this.initParticles();
-    this.initStars();
-    this.initOrbs();
     this.bind();
     this.animate();
+    console.log('[EstimateEngine] ParticleBackground started (perlin flow)');
+  }
+
+  /* ── Perlin noise helpers (from Odysseus Terminal theme) ── */
+  _noise2d(x, y) {
+    const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+    return n - Math.floor(n);
+  }
+
+  _smoothNoise(x, y) {
+    const ix = Math.floor(x), iy = Math.floor(y);
+    const fx = x - ix, fy = y - iy;
+    const a = this._noise2d(ix, iy), b = this._noise2d(ix + 1, iy);
+    const c = this._noise2d(ix, iy + 1), d = this._noise2d(ix + 1, iy + 1);
+    const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+    return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+  }
+
+  /* ── Read current theme colors from CSS ── */
+  _getColor() {
+    const s = getComputedStyle(document.body);
+    return s.getPropertyValue('--text-primary').trim() || '#33ff66';
+  }
+
+  _getBg() {
+    return getComputedStyle(document.body).getPropertyValue('--bg-deep').trim() || '#363748';
+  }
+
+  _hexToRgb(hex) {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
   }
 
   resize() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.W = window.innerWidth;
+    this.H = window.innerHeight;
+    this.canvas.width = this.W * dpr;
+    this.canvas.height = this.H * dpr;
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Initialize particles on first resize
+    if (this.particles.length === 0) {
+      for (let i = 0; i < 200; i++) {
+        this.particles.push({
+          x: Math.random() * this.W,
+          y: Math.random() * this.H,
+          life: Math.random(),
+        });
+      }
+    }
   }
 
   bind() {
-    window.addEventListener('resize', () => this.resize());
-    document.addEventListener('mousemove', (e) => {
-      this.mouseX = e.clientX;
-      this.mouseY = e.clientY;
-    });
-  }
-
-  initParticles() {
-    const count = Math.min(80, Math.floor(window.innerWidth / 18));
-    const palette = [120, 140, 160, 180, 200, 220, 260, 280, 300, 320];
-    for (let i = 0; i < count; i++) {
-      const hue = palette[Math.floor(Math.random() * palette.length)] + (Math.random() - 0.5) * 30;
-      this.particles.push({
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: (Math.random() - 0.5) * 0.35 - 0.05,
-        size: Math.random() * 2.5 + 0.8,
-        opacity: Math.random() * 0.5 + 0.3,
-        hue: hue,
-        sat: 70 + Math.random() * 30,
-        light: 55 + Math.random() * 25,
-        pulse: Math.random() * Math.PI * 2,
-        pulseSpeed: 0.015 + Math.random() * 0.02,
-        driftX: Math.random() * 0.1 - 0.05,
-        driftY: Math.random() * 0.1 - 0.05,
-      });
-    }
-  }
-
-  initStars() {
-    const count = Math.min(120, Math.floor(window.innerWidth / 13));
-    for (let i = 0; i < count; i++) {
-      this.stars.push({
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height,
-        size: Math.random() * 1.5 + 0.3,
-        twinkle: Math.random() * Math.PI * 2,
-        speed: 0.02 + Math.random() * 0.03,
-        hue: 120 + Math.random() * 100,
-      });
-    }
-  }
-
-  initOrbs() {
-    // Large, slow-moving glowing orbs for ambient depth
-    const orbColors = [
-      { h: 140, s: 80, l: 50 },  // green
-      { h: 260, s: 70, l: 55 },  // purple
-      { h: 190, s: 75, l: 50 },  // teal
-      { h: 330, s: 65, l: 55 },  // pink
-      { h:  45, s: 80, l: 50 },  // gold
-    ];
-    for (let i = 0; i < 3; i++) {
-      const c = orbColors[i % orbColors.length];
-      this.orbs.push({
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.12,
-        radius: 180 + Math.random() * 220,
-        hue: c.h,
-        sat: c.s,
-        light: c.l,
-        opacity: 0.04 + Math.random() * 0.04,
-        phase: Math.random() * Math.PI * 2,
-      });
-    }
-  }
-
-  addGlyph(x, y) {
-    const glyphs = ['◈', '✦', '◉', '◆', '◇', '✧', '⬟', '△', '◍', '◎', '✦', '❖', '⟡'];
-    const hue = 120 + Math.random() * 200;
-    this.glyphs.push({
-      char: glyphs[Math.floor(Math.random() * glyphs.length)],
-      x, y,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: -0.2 - Math.random() * 0.4,
-      opacity: 0.3 + Math.random() * 0.4,
-      life: 1,
-      size: 14 + Math.random() * 20,
-      hue: hue,
-    });
+    this._onResize = () => this.resize();
+    window.addEventListener('resize', this._onResize);
   }
 
   animate() {
     const ctx = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-    this.time += 0.005;
+    const W = this.W, H = this.H;
+    if (!W || !H) { requestAnimationFrame(() => this.animate()); return; }
 
-    // ---------- Fade clear (creates trails) ----------
-    const fadeAlpha = 0.10;
-    ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
-    ctx.fillRect(0, 0, w, h);
+    // ── Fade previous frame by layering translucent bg ──
+    const bgHex = this._getBg();
+    const bgRgb = this._hexToRgb(bgHex) || { r: 0, g: 0, b: 0 };
+    ctx.fillStyle = `rgba(${bgRgb.r},${bgRgb.g},${bgRgb.b},0.03)`;
+    ctx.fillRect(0, 0, W, H);
 
-    // ---------- Draw glowing orbs ----------
-    for (const orb of this.orbs) {
-      // Drift slowly
-      orb.x += orb.vx + Math.sin(this.time + orb.phase) * 0.2;
-      orb.y += orb.vy + Math.cos(this.time + orb.phase * 0.7) * 0.15;
+    // ── Draw particles ──
+    const color = this._getColor();
+    this.particles.forEach(p => {
+      const n = this._smoothNoise(p.x * 0.004 + this.t * 0.0008, p.y * 0.004 + 100);
+      const angle = n * Math.PI * 6;
+      const speed = 1 + this._smoothNoise(p.x * 0.003, p.y * 0.003 + 50) * 1.5;
+      p.x += Math.cos(angle) * speed;
+      p.y += Math.sin(angle) * speed;
+      p.life -= 0.001;
 
-      // Wrap around
-      if (orb.x < -orb.radius) orb.x = w + orb.radius;
-      if (orb.x > w + orb.radius) orb.x = -orb.radius;
-      if (orb.y < -orb.radius) orb.y = h + orb.radius;
-      if (orb.y > h + orb.radius) orb.y = -orb.radius;
-
-      // Mouse attraction (gentle)
-      const dx = orb.x - this.mouseX;
-      const dy = orb.y - this.mouseY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 400 && dist > 0) {
-        orb.x -= dx / dist * 0.15;
-        orb.y -= dy / dist * 0.15;
+      // Respawn when exhausted or out of bounds
+      if (p.life <= 0 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
+        p.x = Math.random() * W;
+        p.y = Math.random() * H;
+        p.life = 1;
       }
 
-      // Draw multi-layered glow
-      for (let layer = 0; layer < 3; layer++) {
-        const r = orb.radius * (1 - layer * 0.25);
-        const alpha = orb.opacity * (1 - layer * 0.2) * (0.8 + 0.2 * Math.sin(this.time * 2 + orb.phase + layer));
-        const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, r);
-        grad.addColorStop(0, `hsla(${orb.hue}, ${orb.sat}%, ${orb.light}%, ${alpha * 0.6})`);
-        grad.addColorStop(0.4, `hsla(${orb.hue + 30}, ${orb.sat}%, ${orb.light + 10}%, ${alpha * 0.3})`);
-        grad.addColorStop(1, `hsla(${orb.hue + 60}, ${orb.sat}%, ${orb.light + 15}%, 0)`);
-        ctx.fillStyle = grad;
-        ctx.fillRect(orb.x - r, orb.y - r, r * 2, r * 2);
-      }
-    }
-
-    // ---------- Draw stars ----------
-    for (const star of this.stars) {
-      star.twinkle += star.speed;
-      const alpha = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(star.twinkle));
+      // Draw tiny particle dot
       ctx.beginPath();
-      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${star.hue}, 70%, 70%, ${alpha * 0.6})`;
+      ctx.arc(p.x, p.y, 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = p.life * 0.12;
       ctx.fill();
-    }
+    });
 
-    // ---------- Draw particles ----------
-    for (const p of this.particles) {
-      p.x += p.vx + p.driftX;
-      p.y += p.vy + p.driftY;
-      p.pulse += p.pulseSpeed;
-
-      // Wrap around
-      if (p.x < 0) p.x = w;
-      if (p.x > w) p.x = 0;
-      if (p.y < 0) p.y = h;
-      if (p.y > h) p.y = 0;
-
-      const pulseFactor = 0.7 + 0.3 * Math.sin(p.pulse);
-      const pulseAlpha = p.opacity * pulseFactor;
-      const size = p.size * (0.9 + 0.1 * Math.sin(p.pulse * 0.7));
-
-      // Glow outer
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, size * 4, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light}%, ${pulseAlpha * 0.08})`;
-      ctx.fill();
-
-      // Glow inner
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, size * 2, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light + 10}%, ${pulseAlpha * 0.15})`;
-      ctx.fill();
-
-      // Core
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue}, ${p.sat}%, ${p.light + 15}%, ${pulseAlpha * 0.85})`;
-      ctx.fill();
-    }
-
-    // ---------- Particle connections ----------
-    for (let i = 0; i < this.particles.length; i++) {
-      for (let j = i + 1; j < this.particles.length; j++) {
-        const dx = this.particles[i].x - this.particles[j].x;
-        const dy = this.particles[i].y - this.particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 130) {
-          const a = 0.15 * (1 - dist / 130);
-          const hue = (this.particles[i].hue + this.particles[j].hue) / 2;
-          ctx.beginPath();
-          ctx.moveTo(this.particles[i].x, this.particles[i].y);
-          ctx.lineTo(this.particles[j].x, this.particles[j].y);
-          ctx.strokeStyle = `hsla(${hue}, 70%, 60%, ${a})`;
-          ctx.lineWidth = 0.6;
-          ctx.stroke();
-        }
-      }
-    }
-
-    // ---------- Draw floating glyphs ----------
-    for (let i = this.glyphs.length - 1; i >= 0; i--) {
-      const g = this.glyphs[i];
-      g.x += g.vx;
-      g.y += g.vy;
-      g.life -= 0.004;
-
-      if (g.life <= 0 || g.y < -50 || g.x < -50 || g.x > w + 50) {
-        this.glyphs.splice(i, 1);
-        continue;
-      }
-
-      ctx.save();
-      ctx.font = `${g.size}px serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const glow = g.opacity * g.life;
-      // Outer glow
-      ctx.shadowColor = `hsla(${g.hue || 260}, 70%, 60%, ${glow * 0.5})`;
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = `hsla(${g.hue || 260}, 70%, 75%, ${glow * 0.8})`;
-      ctx.fillText(g.char, g.x, g.y);
-      ctx.restore();
-    }
-
-    // Occasionally spawn glyph at mouse
-    if (Math.random() < 0.008 && this.mouseX > 0) {
-      this.addGlyph(
-        this.mouseX + (Math.random() - 0.5) * 60,
-        this.mouseY + (Math.random() - 0.5) * 60
-      );
-    }
-
-    // Occasionally spawn glyphs randomly
-    if (Math.random() < 0.003) {
-      this.addGlyph(
-        Math.random() * w,
-        h + 20
-      );
-    }
+    ctx.globalAlpha = 1;
+    this.t++;
 
     requestAnimationFrame(() => this.animate());
   }
@@ -939,8 +798,13 @@ function loadSavedTheme() {
 }
 
 function initThemePicker() {
-  document.querySelectorAll('.theme-dot').forEach(dot => {
-    dot.addEventListener('click', () => setTheme(dot.dataset.theme));
+  const dots = document.querySelectorAll('.theme-dot');
+  console.log('[EstimateEngine] initThemePicker: found', dots.length, 'theme dots');
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      console.log('[Theme] dot clicked:', dot.dataset.theme);
+      setTheme(dot.dataset.theme);
+    });
   });
   loadSavedTheme();
 }
@@ -1097,7 +961,6 @@ function showModal(type) {
   dom.modalOverlay.classList.remove('modal-hidden');
   dom.saveModal.style.display = type === 'save' ? 'flex' : 'none';
   dom.loadModal.style.display = type === 'load' ? 'flex' : 'none';
-  dom.calcModal.style.display = 'none';  // ensure calc modal doesn't leak through
   if (type === 'save') {
     dom.saveName.value = state.projectName || 'Untitled Estimate';
     renderSavedList();
@@ -1112,7 +975,6 @@ function hideModal() {
   dom.modalOverlay.classList.add('modal-hidden');
   dom.saveModal.style.display = 'none';
   dom.loadModal.style.display = 'none';
-  dom.calcModal.style.display = 'none';
 }
 
 function renderSavedList() {
@@ -1572,6 +1434,7 @@ function toggleChangeStatus(id) {
 }
 
 function renderChangeOrders() {
+  if (!state.changeOrders) state.changeOrders = [];
   dom.changeTbody.innerHTML = state.changeOrders.map(c => {
     const cls = `co-status-${c.status}`;
     const label = c.status.charAt(0).toUpperCase() + c.status.slice(1);
@@ -1881,10 +1744,12 @@ function performCalc(a, b, op) {
 
 function initBasicCalc() {
   const container = document.querySelector('.basic-calc-buttons');
-  if (!container) return;
+  if (!container) { console.warn('initBasicCalc: container .basic-calc-buttons not found'); return; }
+  console.log('[EstimateEngine] initBasicCalc: binding click delegation');
   // Use event delegation — one listener for all calc buttons
   container.addEventListener('click', (e) => {
     const btn = e.target.closest('.calc-btn');
+    console.log('[Calc] click on container, target:', e.target, 'btn:', btn, 'action:', btn?.dataset?.action);
     if (btn && btn.dataset.action) {
       e.preventDefault();
       basicCalcInput(btn.dataset.action);
@@ -2113,23 +1978,31 @@ function escapeAttr(str) {
    ════════════════════════════════════════════════════════════════ */
 
 async function init() {
-  cacheDom();
-  await Promise.all([loadMaterials(), loadCaCodes()]);
-  setupAutocomplete();
-  setupCodeSearch();
-  bindEvents();
-  syncStateToUI();
-  initBasicCalc();
-  initThemePicker();
+  console.log('[EstimateEngine] init() started');
+  try { cacheDom(); } catch(e) { console.warn('[Init] cacheDom:', e); }
+  try { await Promise.all([loadMaterials(), loadCaCodes()]); } catch(e) { console.warn('[Init] loadData:', e); }
+  try { setupAutocomplete(); } catch(e) { console.warn('[Init] autocomplete:', e); }
+  try { setupCodeSearch(); } catch(e) { console.warn('[Init] codeSearch:', e); }
+  try { bindEvents(); } catch(e) { console.warn('[Init] bindEvents:', e); }
+  try { syncStateToUI(); } catch(e) { console.warn('[Init] syncStateToUI:', e); }
+  console.log('[EstimateEngine] init core ready, starting calculator+themes');
+  try { initBasicCalc(); } catch(e) { console.warn('[Init] basicCalc:', e); }
+  try { initThemePicker(); } catch(e) { console.warn('[Init] themePicker:', e); }
   // Run initial calc updates so tabs show values right away
-  updateCalc('drywall');
-  updateCalc('concrete');
-  updateCalc('lumber');
-  updateCalc('paint');
-  updateCalc('flooring');
+  try { updateCalc('drywall'); } catch(e) {}
+  try { updateCalc('concrete'); } catch(e) {}
+  try { updateCalc('lumber'); } catch(e) {}
+  try { updateCalc('paint'); } catch(e) {}
+  try { updateCalc('flooring'); } catch(e) {}
   // Start particle background
-  const bg = new ParticleBackground('bg-canvas');
+  try { const bg = new ParticleBackground('bg-canvas'); } catch(e) { console.warn('[Init] background:', e); }
   showToast('◈ Estimate Engine ready', 'info');
+  console.log('[EstimateEngine] init() complete');
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// Start on DOMContentLoaded; also fallback if script loads after DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', safeInit);
+} else {
+  safeInit();
+}
