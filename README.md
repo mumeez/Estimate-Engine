@@ -89,11 +89,19 @@ npx tauri build
 The first build compiles all of Tauri's Rust dependencies — expect **15–30 minutes** on the first run. After that, rebuilds are seconds.
 
 The output will be at:
-- **Linux:** `src-tauri/target/release/bundle/appimage/` (`.AppImage`)
+- **Linux:** `src-tauri/target/release/bundle/deb/` (`.deb`) and `src-tauri/target/release/bundle/rpm/` (`.rpm`)
 - **macOS:** `src-tauri/target/release/bundle/dmg/` (`.dmg`)
 - **Windows:** `src-tauri/target/release/bundle/msi/` (`.msi`)
 
 No server needed — the app is fully self-contained.
+
+> **Tiling WM users (Niri / Hyprland / Sway):** The window has no title bar or window decorations (`decorations: false`) so it blends cleanly with your WM. The window manager's own close keybind (e.g. Super+Q) still works. If you want the title bar back, set `"decorations": true` in `src-tauri/tauri.conf.json`.
+
+**App launcher entry:** After building, run the install script to add it to your desktop applications:
+```bash
+bash install-desktop.sh
+```
+This copies the binary to `~/.local/bin/` and creates a `.desktop` entry so you can launch it from your app launcher. To uninstall, just delete those files.
 
 ---
 

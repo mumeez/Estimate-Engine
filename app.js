@@ -2101,6 +2101,19 @@ async function init() {
   console.log('[EstimateEngine] init() complete');
 }
 
+/* ── Global quit shortcut (frameless window support) ── */
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'q' || e.key === 'Q')) {
+    e.preventDefault();
+    // Try Tauri app exit first
+    if (window.__TAURI__ && window.__TAURI__.process) {
+      window.__TAURI__.process.exit(0);
+    } else {
+      window.close();
+    }
+  }
+});
+
 // Start on DOMContentLoaded; also fallback if script loads after DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', safeInit);
