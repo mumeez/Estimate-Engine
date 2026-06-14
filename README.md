@@ -80,10 +80,13 @@ You can wrap Estimate Engine as a standalone desktop app using [Tauri](https://v
 
 **Build:**
 ```bash
+git clone https://github.com/mumeez/Estimate-Engine.git
 cd Estimate-Engine
 npm install
 npx tauri build
 ```
+
+The first build compiles all of Tauri's Rust dependencies — expect **15–30 minutes** on the first run. After that, rebuilds are seconds.
 
 The output will be at:
 - **Linux:** `src-tauri/target/release/bundle/appimage/` (`.AppImage`)
