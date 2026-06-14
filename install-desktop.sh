@@ -8,8 +8,10 @@
 set -euo pipefail
 
 BINARY="src-tauri/target/release/estimate-engine"
+WRAPPER="estimate-engine.sh"
 ICON_SRC="src-tauri/icons/icon.png"
 BIN_DEST="$HOME/.local/bin/estimate-engine"
+WRAPPER_DEST="$HOME/.local/bin/estimate-engine.sh"
 ICON_DEST="$HOME/.local/share/icons/estimate-engine.png"
 DESKTOP_DEST="$HOME/.local/share/applications/estimate-engine.desktop"
 
@@ -25,6 +27,10 @@ mkdir -p "$HOME/.local/bin"
 cp "$BINARY" "$BIN_DEST"
 chmod +x "$BIN_DEST"
 
+echo "==> Installing launch wrapper to $WRAPPER_DEST"
+cp "$WRAPPER" "$WRAPPER_DEST"
+chmod +x "$WRAPPER_DEST"
+
 echo "==> Installing icon to $ICON_DEST"
 if [ -f "$ICON_SRC" ]; then
     mkdir -p "$HOME/.local/share/icons"
@@ -38,7 +44,7 @@ cat > "$DESKTOP_DEST" << EOF
 Type=Application
 Name=Estimate Engine
 Comment=Construction & Remodel Estimating Tool
-Exec=$BIN_DEST
+Exec=$WRAPPER_DEST
 Icon=estimate-engine
 Terminal=false
 Categories=Office;ProjectManagement;
@@ -52,5 +58,8 @@ echo "Next steps:"
 echo "  1. Log out and back in (or run: update-desktop-database ~/.local/share/applications 2>/dev/null)"
 echo "  2. Look for 'Estimate Engine' in your app launcher"
 echo ""
-echo "To uninstall:"
-echo "  rm -f $BIN_DEST $ICON_DEST $DESKTOP_DEST"
+echo "To uninstall (run both commands):"
+echo "  rm -f $BIN_DEST $ICON_DEST $DESKTOP_DEST $WRAPPER_DEST"
+echo ""
+echo "To run from terminal directly (avoids GPU crash on Wayland):"
+echo "  $WRAPPER_DEST"
