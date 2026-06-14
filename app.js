@@ -189,14 +189,11 @@ class ParticleBackground {
     if (!this.ctx) { console.warn('ParticleBackground: 2d context not available'); return; }
     this.particles = [];
     this.t = 0;
-    this._running = true;
     this._cachedColor = '#33ff66';
-    this._cachedBg = '#363748';
     this._cachedBgRgb = { r: 54, g: 55, b: 72 };
     this.refreshColors();
     this.resize();
-    this._bind();
-    this._bindVisibility();
+    window.addEventListener('resize', () => this.resize());
     this.animate();
     console.log('[EstimateEngine] ParticleBackground started (perlin flow)');
   }
@@ -206,7 +203,6 @@ class ParticleBackground {
     const s = getComputedStyle(document.body);
     this._cachedColor = s.getPropertyValue('--text-primary').trim() || '#33ff66';
     const bgHex = s.getPropertyValue('--bg-deep').trim() || '#363748';
-    this._cachedBg = bgHex;
     const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(bgHex);
     this._cachedBgRgb = m
       ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
@@ -228,11 +224,6 @@ class ParticleBackground {
     return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
   }
 
-  _hexToRgb(hex) {
-    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return m ? { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) } : null;
-  }
-
   resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     this.W = window.innerWidth;
@@ -240,7 +231,6 @@ class ParticleBackground {
     this.canvas.width = this.W * dpr;
     this.canvas.height = this.H * dpr;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // Initialize particles on first resize (120 is smooth but frugal)
     if (this.particles.length === 0) {
       for (let i = 0; i < 120; i++) {
         this.particles.push({
@@ -252,48 +242,21 @@ class ParticleBackground {
     }
   }
 
-  _bind() {
-    this._onResize = () => this.resize();
-    window.addEventListener('resize', this._onResize);
-  }
-
-  /* ── Pause animation when window is hidden (saves CPU) ── */
-  _bindVisibility() {
-    this._onVisibility = () => {
-      this._running = !document.hidden;
-      // RAF chain stays alive automatically — never call animate() directly here.
-      // Calling it would create duplicate chains that multiply exponentially.
-    };
-    document.addEventListener('visibilitychange', this._onVisibility);
-  }
-
   animate() {
-    // ALWAYS queue the next frame first — never let the chain break.
-    // If we return early before queuing, the chain dies and any direct
-    // call to restart it risks creating duplicate chains (exponential blowup).
-    this._rafId = requestAnimationFrame(() => this.animate());
+    try {
+      const ctx = this.ctx;
+      const W = this.W, H = this.H;
+      if (!W || !H) { requestAnimationFrame(() => this.animate()); return; }
 
-    if (!this._running) return; // paused — just skip work
-    const ctx = this.ctx;
-    const W = this.W, H = this.H;
-    if (!W || !H) return;
+      // ── Fade previous frame ──
+      const bgRgb = this._cachedBgRgb;
+      ctx.fillStyle = `rgba(${bgRgb.r},${bgRgb.g},${bgRgb.b},0.03)`;
+      ctx.fillRect(0, 0, W, H);
 
-    // ── Run physics at 30 fps, draw every frame for smooth visuals ──
-    const skip = this._frameCount % 2 === 0;
-    this._frameCount = (this._frameCount || 0) + 1;
-
-    // ── Fade previous frame by layering translucent bg ──
-    const bgRgb = this._cachedBgRgb;
-    ctx.fillStyle = `rgba(${bgRgb.r},${bgRgb.g},${bgRgb.b},0.03)`;
-    ctx.fillRect(0, 0, W, H);
-
-    // ── Update & draw particles ──
-    const color = this._cachedColor;
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
-
-      // Physics: run every other frame (30 fps)
-      if (!skip) {
+      // ── Update & draw particles ──
+      const color = this._cachedColor;
+      for (let i = 0; i < this.particles.length; i++) {
+        const p = this.particles[i];
         const n = this._smoothNoise(p.x * 0.004 + this.t * 0.0008, p.y * 0.004 + 100);
         const angle = n * Math.PI * 6;
         const speed = 1 + this._smoothNoise(p.x * 0.003, p.y * 0.003 + 50) * 1.5;
@@ -301,31 +264,26 @@ class ParticleBackground {
         p.y += Math.sin(angle) * speed;
         p.life -= 0.001;
 
-        // Respawn when exhausted or out of bounds
         if (p.life <= 0 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
           p.x = Math.random() * W;
           p.y = Math.random() * H;
           p.life = 1;
         }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.8, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = p.life * 0.12;
+        ctx.fill();
       }
 
-      // Draw every frame (60 fps) — cheap arc + fill
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 0.8, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.globalAlpha = p.life * 0.12;
-      ctx.fill();
+      ctx.globalAlpha = 1;
+      this.t++;
+    } catch (e) {
+      console.error('[ParticleBackground] error:', e);
     }
 
-    ctx.globalAlpha = 1;
-    if (!skip) this.t++;
-  }
-
-  /* ── Cleanup (unused currently, but nice to have) ── */
-  destroy() {
-    this._running = false;
-    window.removeEventListener('resize', this._onResize);
-    document.removeEventListener('visibilitychange', this._onVisibility);
+    requestAnimationFrame(() => this.animate());
   }
 }
 
