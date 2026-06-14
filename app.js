@@ -240,9 +240,9 @@ class ParticleBackground {
     this.canvas.width = this.W * dpr;
     this.canvas.height = this.H * dpr;
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // Initialize particles on first resize
+    // Initialize particles on first resize (120 is smooth but frugal)
     if (this.particles.length === 0) {
-      for (let i = 0; i < 200; i++) {
+      for (let i = 0; i < 120; i++) {
         this.particles.push({
           x: Math.random() * this.W,
           y: Math.random() * this.H,
@@ -272,39 +272,48 @@ class ParticleBackground {
     const W = this.W, H = this.H;
     if (!W || !H) { requestAnimationFrame(() => this.animate()); return; }
 
+    // ── Run physics at 30 fps, draw every frame for smooth visuals ──
+    // This cuts CPU in half while looking nearly identical
+    const skip = this._frameCount % 2 === 0;
+    this._frameCount = (this._frameCount || 0) + 1;
+
     // ── Fade previous frame by layering translucent bg ──
-    // Use cached colors — never call getComputedStyle per frame
     const bgRgb = this._cachedBgRgb;
     ctx.fillStyle = `rgba(${bgRgb.r},${bgRgb.g},${bgRgb.b},0.03)`;
     ctx.fillRect(0, 0, W, H);
 
-    // ── Draw particles ──
+    // ── Update & draw particles ──
     const color = this._cachedColor;
-    this.particles.forEach(p => {
-      const n = this._smoothNoise(p.x * 0.004 + this.t * 0.0008, p.y * 0.004 + 100);
-      const angle = n * Math.PI * 6;
-      const speed = 1 + this._smoothNoise(p.x * 0.003, p.y * 0.003 + 50) * 1.5;
-      p.x += Math.cos(angle) * speed;
-      p.y += Math.sin(angle) * speed;
-      p.life -= 0.001;
+    for (let i = 0; i < this.particles.length; i++) {
+      const p = this.particles[i];
 
-      // Respawn when exhausted or out of bounds
-      if (p.life <= 0 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
-        p.x = Math.random() * W;
-        p.y = Math.random() * H;
-        p.life = 1;
+      // Physics: run every other frame (30 fps)
+      if (!skip) {
+        const n = this._smoothNoise(p.x * 0.004 + this.t * 0.0008, p.y * 0.004 + 100);
+        const angle = n * Math.PI * 6;
+        const speed = 1 + this._smoothNoise(p.x * 0.003, p.y * 0.003 + 50) * 1.5;
+        p.x += Math.cos(angle) * speed;
+        p.y += Math.sin(angle) * speed;
+        p.life -= 0.001;
+
+        // Respawn when exhausted or out of bounds
+        if (p.life <= 0 || p.x < 0 || p.x > W || p.y < 0 || p.y > H) {
+          p.x = Math.random() * W;
+          p.y = Math.random() * H;
+          p.life = 1;
+        }
       }
 
-      // Draw tiny particle dot
+      // Draw every frame (60 fps) — cheap arc + fill
       ctx.beginPath();
       ctx.arc(p.x, p.y, 0.8, 0, Math.PI * 2);
       ctx.fillStyle = color;
       ctx.globalAlpha = p.life * 0.12;
       ctx.fill();
-    });
+    }
 
     ctx.globalAlpha = 1;
-    this.t++;
+    if (!skip) this.t++;
 
     requestAnimationFrame(() => this.animate());
   }
