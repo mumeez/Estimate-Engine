@@ -95,7 +95,7 @@ The output will be at:
 
 No server needed — the app is fully self-contained.
 
-> **Tiling WM users (Niri / Hyprland / Sway):** The window title bar is enabled by default for compatibility. If your compositor handles decorations (the title bar looks double or you prefer frameless), you can disable it by setting `"decorations": false` in `src-tauri/tauri.conf.json`. The WM's own close keybind (e.g. Super+Q) still works either way.
+> **Tiling WM users (Niri / Hyprland / Sway):** The window is frameless (`decorations: false`) — no title bar, no minimize/maximize/close buttons. Your window manager handles window management with its own keybinds (e.g. Super+Q to close).
 
 **App launcher entry:** After building, run the install script to add it to your desktop applications:
 ```bash
