@@ -1014,6 +1014,106 @@ td.td-actions { text-align: center; }
   font-weight: 600;
 }
 
+/* ─── BASIC CALCULATOR ─── */
+.basic-calc {
+  width: 100%;
+}
+
+.basic-calc-display {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+  margin-bottom: 8px;
+  min-height: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.basic-calc-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.calc-btn {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+}
+
+.calc-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.calc-btn:active {
+  transform: scale(0.95);
+}
+
+.calc-btn-fn {
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.calc-btn-fn:hover {
+  color: var(--warning);
+  border-color: var(--warning);
+}
+
+.calc-btn-op {
+  background: var(--bg-surface);
+  color: var(--accent-light);
+  font-size: 1.1rem;
+}
+
+.calc-btn-op:hover {
+  background: var(--accent);
+  border-color: var(--accent-light);
+  color: #fff;
+}
+
+.calc-btn-eq {
+  background: var(--accent);
+  border-color: var(--accent-light);
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.calc-btn-eq:hover {
+  background: var(--accent-light);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.calc-btn-zero {
+  grid-column: span 1;
+}
+
+.calc-btn-neg {
+  font-size: 1rem;
+}
+
+.calc-add-btn {
+  width: 100%;
+  margin-top: 4px;
+}
+
 /* ─── CHANGE ORDERS ─── */
 #change-table th, #change-table td {
   padding: 5px 6px;
@@ -1089,6 +1189,11 @@ td.td-actions { text-align: center; }
   .add-btn-group,
   #btn-cancel-edit,
   #btn-add-item {
+    display: none !important;
+  }
+
+  /* Hide calculator card in print */
+  #calc-card {
     display: none !important;
   }
 }

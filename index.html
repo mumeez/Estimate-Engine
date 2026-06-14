@@ -490,13 +490,133 @@
           </div>
         </div>
 
+        <!-- Calculators (inline) -->
+        <div class="card" id="calc-card">
+          <div class="card-header">
+            <span class="card-icon">▣</span>
+            <h2>Calculators</h2>
+          </div>
+          <div class="card-body">
+            <div class="calc-tabs">
+              <button class="btn btn-sm calc-tab active" data-calc="basic">Calc</button>
+              <button class="btn btn-sm calc-tab" data-calc="drywall">Drywall</button>
+              <button class="btn btn-sm calc-tab" data-calc="concrete">Concrete</button>
+              <button class="btn btn-sm calc-tab" data-calc="lumber">Lumber</button>
+              <button class="btn btn-sm calc-tab" data-calc="paint">Paint</button>
+              <button class="btn btn-sm calc-tab" data-calc="flooring">Flooring</button>
+            </div>
+
+            <!-- Basic Calculator -->
+            <div class="calc-pane" id="calc-basic">
+              <div class="basic-calc">
+                <div class="basic-calc-display" id="basic-calc-display">0</div>
+                <div class="basic-calc-buttons">
+                  <button class="calc-btn calc-btn-fn" data-action="ac">AC</button>
+                  <button class="calc-btn calc-btn-fn" data-action="c">C</button>
+                  <button class="calc-btn calc-btn-fn" data-action="percent">%</button>
+                  <button class="calc-btn calc-btn-op" data-action="divide">÷</button>
+                  <button class="calc-btn" data-action="7">7</button>
+                  <button class="calc-btn" data-action="8">8</button>
+                  <button class="calc-btn" data-action="9">9</button>
+                  <button class="calc-btn calc-btn-op" data-action="multiply">×</button>
+                  <button class="calc-btn" data-action="4">4</button>
+                  <button class="calc-btn" data-action="5">5</button>
+                  <button class="calc-btn" data-action="6">6</button>
+                  <button class="calc-btn calc-btn-op" data-action="subtract">−</button>
+                  <button class="calc-btn" data-action="1">1</button>
+                  <button class="calc-btn" data-action="2">2</button>
+                  <button class="calc-btn" data-action="3">3</button>
+                  <button class="calc-btn calc-btn-op" data-action="add">+</button>
+                  <button class="calc-btn calc-btn-zero" data-action="0">0</button>
+                  <button class="calc-btn" data-action="decimal">.</button>
+                  <button class="calc-btn calc-btn-neg" data-action="negate">±</button>
+                  <button class="calc-btn calc-btn-eq" data-action="equals">=</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Drywall -->
+            <div class="calc-pane" id="calc-drywall" style="display:none;">
+              <p class="calc-desc">Calculate how many drywall sheets you need.</p>
+              <div class="form-row">
+                <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-dw-width" value="12" step="0.5" /></div>
+                <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-dw-length" value="12" step="0.5" /></div>
+                <div class="form-group"><label>Ceiling Height (ft)</label><input type="number" id="calc-dw-height" value="8" step="0.5" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-group-sm"><label>Sheet Size</label><select id="calc-dw-sheet"><option value="32">4x8 (32 sqft)</option><option value="36">4x9 (36 sqft)</option><option value="40">4x10 (40 sqft)</option></select></div>
+                <div class="form-group form-group-sm"><label>Waste %</label><input type="number" id="calc-dw-waste" value="10" min="0" max="50" /></div>
+                <div class="form-group form-group-sm"><label># of Openings</label><input type="number" id="calc-dw-doors" value="2" min="0" /></div>
+              </div>
+              <div class="calc-result" id="calc-dw-result">Sheets needed: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
+              <button class="btn btn-sm btn-accent calc-add-btn" onclick="addCalcResultToEstimate('drywall')">+ Add to Estimate</button>
+            </div>
+
+            <!-- Concrete -->
+            <div class="calc-pane" id="calc-concrete" style="display:none;">
+              <p class="calc-desc">Calculate concrete volume in cubic yards.</p>
+              <div class="form-row">
+                <div class="form-group"><label>Length (ft)</label><input type="number" id="calc-con-length" value="10" step="0.5" /></div>
+                <div class="form-group"><label>Width (ft)</label><input type="number" id="calc-con-width" value="10" step="0.5" /></div>
+                <div class="form-group"><label>Depth (inches)</label><input type="number" id="calc-con-depth" value="4" step="0.5" /></div>
+              </div>
+              <div class="calc-result" id="calc-con-result">Cubic yards: <strong>0</strong> | 80lb bags: <strong>0</strong> | Total: <strong>$0.00</strong></div>
+              <button class="btn btn-sm btn-accent calc-add-btn" onclick="addCalcResultToEstimate('concrete')">+ Add to Estimate</button>
+            </div>
+
+            <!-- Lumber -->
+            <div class="calc-pane" id="calc-lumber" style="display:none;">
+              <p class="calc-desc">Calculate lumber needed for wall framing.</p>
+              <div class="form-row">
+                <div class="form-group"><label>Wall Length (ft)</label><input type="number" id="calc-lum-length" value="20" step="0.5" /></div>
+                <div class="form-group form-group-sm"><label>Stud Spacing</label><select id="calc-lum-spacing"><option value="16">16" OC</option><option value="24">24" OC</option></select></div>
+                <div class="form-group form-group-sm"><label>Number of Walls</label><input type="number" id="calc-lum-walls" value="1" min="1" step="1" /></div>
+              </div>
+              <div class="calc-result" id="calc-lum-result">Studs: <strong>0</strong> | Plates: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
+              <button class="btn btn-sm btn-accent calc-add-btn" onclick="addCalcResultToEstimate('lumber')">+ Add to Estimate</button>
+            </div>
+
+            <!-- Paint -->
+            <div class="calc-pane" id="calc-paint" style="display:none;">
+              <p class="calc-desc">Calculate how much paint you need.</p>
+              <div class="form-row">
+                <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-pt-width" value="12" step="0.5" /></div>
+                <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-pt-length" value="12" step="0.5" /></div>
+                <div class="form-group"><label>Ceiling Height (ft)</label><input type="number" id="calc-pt-height" value="8" step="0.5" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-group-sm"><label># of Windows</label><input type="number" id="calc-pt-windows" value="2" min="0" /></div>
+                <div class="form-group form-group-sm"><label># of Doors</label><input type="number" id="calc-pt-doors" value="1" min="0" /></div>
+                <div class="form-group form-group-sm"><label># of Coats</label><select id="calc-pt-coats"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></div>
+              </div>
+              <div class="calc-result" id="calc-pt-result">Gallons needed: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
+              <button class="btn btn-sm btn-accent calc-add-btn" onclick="addCalcResultToEstimate('paint')">+ Add to Estimate</button>
+            </div>
+
+            <!-- Flooring -->
+            <div class="calc-pane" id="calc-flooring" style="display:none;">
+              <p class="calc-desc">Calculate flooring material needed.</p>
+              <div class="form-row">
+                <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-fl-width" value="12" step="0.5" /></div>
+                <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-fl-length" value="14" step="0.5" /></div>
+                <div class="form-group form-group-sm"><label>Waste %</label><input type="number" id="calc-fl-waste" value="10" min="0" max="50" /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group form-group-sm"><label>Material Price/sqft</label><input type="number" id="calc-fl-price" value="3.99" step="0.01" /></div>
+                <div class="form-group form-group-sm"><label>Material Name</label><input type="text" id="calc-fl-name" value="Flooring Material" /></div>
+              </div>
+              <div class="calc-result" id="calc-fl-result">Total sq ft: <strong>0</strong> | Material cost: <strong>$0.00</strong></div>
+              <button class="btn btn-sm btn-accent calc-add-btn" onclick="addCalcResultToEstimate('flooring')">+ Add to Estimate</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Quick actions -->
         <div class="card" id="actions-card">
           <div class="card-body actions-body">
             <button class="btn btn-primary btn-block" id="btn-save-quick">◈ Save Estimate</button>
             <button class="btn btn-block btn-accent" id="btn-export-quick">📄 Export / Print</button>
             <button class="btn btn-block btn-accent" id="btn-export-obsidian">◉ Export to Obsidian</button>
-            <button class="btn btn-block advanced-fields" id="btn-calculators">▣ Quick Calculators</button>
             <button class="btn btn-block" id="btn-reset">⟳ New Estimate</button>
           </div>
         </div>
@@ -539,89 +659,7 @@
           <button class="btn" id="load-modal-cancel">Cancel</button>
         </div>
       </div>
-      <!-- Calculators Modal -->
-      <div class="modal" id="calc-modal" style="width:520px;">
-        <div class="modal-header">
-          <h3>▣ Quick Calculators</h3>
-          <button class="modal-close" id="calc-modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="calc-tabs">
-            <button class="btn btn-sm calc-tab active" data-calc="drywall">Drywall</button>
-            <button class="btn btn-sm calc-tab" data-calc="concrete">Concrete</button>
-            <button class="btn btn-sm calc-tab" data-calc="lumber">Lumber</button>
-            <button class="btn btn-sm calc-tab" data-calc="paint">Paint</button>
-            <button class="btn btn-sm calc-tab" data-calc="flooring">Flooring</button>
-          </div>
-          <div class="calc-pane" id="calc-drywall">
-            <p class="calc-desc">Calculate how many drywall sheets you need.</p>
-            <div class="form-row">
-              <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-dw-width" value="12" step="0.5" /></div>
-              <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-dw-length" value="12" step="0.5" /></div>
-              <div class="form-group"><label>Ceiling Height (ft)</label><input type="number" id="calc-dw-height" value="8" step="0.5" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group form-group-sm"><label>Sheet Size</label><select id="calc-dw-sheet"><option value="32">4x8 (32 sqft)</option><option value="36">4x9 (36 sqft)</option><option value="40">4x10 (40 sqft)</option></select></div>
-              <div class="form-group form-group-sm"><label>Waste %</label><input type="number" id="calc-dw-waste" value="10" min="0" max="50" /></div>
-              <div class="form-group form-group-sm"><label># of Openings</label><input type="number" id="calc-dw-doors" value="2" min="0" /></div>
-            </div>
-            <div class="calc-result" id="calc-dw-result">Sheets needed: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
-            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('drywall')">+ Add to Estimate</button>
-          </div>
-          <div class="calc-pane" id="calc-concrete" style="display:none;">
-            <p class="calc-desc">Calculate concrete volume in cubic yards.</p>
-            <div class="form-row">
-              <div class="form-group"><label>Length (ft)</label><input type="number" id="calc-con-length" value="10" step="0.5" /></div>
-              <div class="form-group"><label>Width (ft)</label><input type="number" id="calc-con-width" value="10" step="0.5" /></div>
-              <div class="form-group"><label>Depth (inches)</label><input type="number" id="calc-con-depth" value="4" step="0.5" /></div>
-            </div>
-            <div class="calc-result" id="calc-con-result">Cubic yards: <strong>0</strong> | 80lb bags: <strong>0</strong> | Total: <strong>$0.00</strong></div>
-            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('concrete')">+ Add to Estimate</button>
-          </div>
-          <div class="calc-pane" id="calc-lumber" style="display:none;">
-            <p class="calc-desc">Calculate lumber needed for wall framing.</p>
-            <div class="form-row">
-              <div class="form-group"><label>Wall Length (ft)</label><input type="number" id="calc-lum-length" value="20" step="0.5" /></div>
-              <div class="form-group form-group-sm"><label>Stud Spacing</label><select id="calc-lum-spacing"><option value="16">16" OC</option><option value="24">24" OC</option></select></div>
-              <div class="form-group form-group-sm"><label>Number of Walls</label><input type="number" id="calc-lum-walls" value="1" min="1" step="1" /></div>
-            </div>
-            <div class="calc-result" id="calc-lum-result">Studs: <strong>0</strong> | Plates: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
-            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('lumber')">+ Add to Estimate</button>
-          </div>
-          <div class="calc-pane" id="calc-paint" style="display:none;">
-            <p class="calc-desc">Calculate how much paint you need.</p>
-            <div class="form-row">
-              <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-pt-width" value="12" step="0.5" /></div>
-              <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-pt-length" value="12" step="0.5" /></div>
-              <div class="form-group"><label>Ceiling Height (ft)</label><input type="number" id="calc-pt-height" value="8" step="0.5" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group form-group-sm"><label># of Windows</label><input type="number" id="calc-pt-windows" value="2" min="0" /></div>
-              <div class="form-group form-group-sm"><label># of Doors</label><input type="number" id="calc-pt-doors" value="1" min="0" /></div>
-              <div class="form-group form-group-sm"><label># of Coats</label><select id="calc-pt-coats"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></div>
-            </div>
-            <div class="calc-result" id="calc-pt-result">Gallons needed: <strong>0</strong> | Total cost: <strong>$0.00</strong></div>
-            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('paint')">+ Add to Estimate</button>
-          </div>
-          <div class="calc-pane" id="calc-flooring" style="display:none;">
-            <p class="calc-desc">Calculate flooring material needed.</p>
-            <div class="form-row">
-              <div class="form-group"><label>Room Width (ft)</label><input type="number" id="calc-fl-width" value="12" step="0.5" /></div>
-              <div class="form-group"><label>Room Length (ft)</label><input type="number" id="calc-fl-length" value="14" step="0.5" /></div>
-              <div class="form-group form-group-sm"><label>Waste %</label><input type="number" id="calc-fl-waste" value="10" min="0" max="50" /></div>
-            </div>
-            <div class="form-row">
-              <div class="form-group form-group-sm"><label>Material Price/sqft</label><input type="number" id="calc-fl-price" value="3.99" step="0.01" /></div>
-              <div class="form-group form-group-sm"><label>Material Name</label><input type="text" id="calc-fl-name" value="Flooring Material" /></div>
-            </div>
-            <div class="calc-result" id="calc-fl-result">Total sq ft: <strong>0</strong> | Material cost: <strong>$0.00</strong></div>
-            <button class="btn btn-sm btn-accent" onclick="addCalcResultToEstimate('flooring')">+ Add to Estimate</button>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn" id="calc-modal-cancel">Close</button>
-        </div>
-      </div>
+      <!-- Calculators Modal is now an inline card in the right panel -->
     </div>
   </div>
 

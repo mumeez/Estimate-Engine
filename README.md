@@ -26,13 +26,15 @@
 - Waste factor on materials
 - Per-item markup & labor category assignment
 
-### Quick Calculators
+### Calculators (Inline in Right Panel)
+- **Basic Calculator** — full arithmetic calculator (+, −, ×, ÷, %, ±) always available
 - **Drywall** — sheets, mud, tape, screws
 - **Concrete** — volume in yards, bag count
 - **Lumber** — board feet calculations
 - **Paint** — gallons needed by wall area
 - **Flooring** — sq ft with waste factor
-- Each calculator can auto-add results to your estimate
+- Switch between calculators with tabs — no modal popups
+- Each construction calculator can auto-add results to your estimate with one click
 
 ### Change Orders
 - Add, approve, reject, or delete change orders
@@ -183,6 +185,7 @@ The UI font is **CaskaydiaCove Nerd Font** (Cascadia Code–based, Nerd Font pat
 - [x] Material auto-fill from database
 - [x] Simple / Advanced mode toggle
 - [x] Quick calculators (drywall, concrete, lumber, paint, flooring)
+- [x] Basic arithmetic calculator (inline in right panel)
 - [x] Change orders
 - [x] Project notes, status, crew & timeline
 - [x] California building code search

@@ -141,10 +141,6 @@ function cacheDom() {
   dom.btnAddChange = $('#btn-add-change');
   dom.changeTbody = $('#change-tbody');
   dom.btnExportObsidian = $('#btn-export-obsidian');
-  dom.btnCalculators = $('#btn-calculators');
-  dom.calcModal = $('#calc-modal');
-  dom.calcModalClose = $('#calc-modal-close');
-  dom.calcModalCancel = $('#calc-modal-cancel');
 }
 
 /* ─── UUID Generator ─── */
@@ -917,6 +913,7 @@ function showModal(type) {
   dom.modalOverlay.classList.remove('modal-hidden');
   dom.saveModal.style.display = type === 'save' ? 'flex' : 'none';
   dom.loadModal.style.display = type === 'load' ? 'flex' : 'none';
+  dom.calcModal.style.display = 'none';  // ensure calc modal doesn't leak through
   if (type === 'save') {
     dom.saveName.value = state.projectName || 'Untitled Estimate';
     renderSavedList();
@@ -929,6 +926,9 @@ function showModal(type) {
 
 function hideModal() {
   dom.modalOverlay.classList.add('modal-hidden');
+  dom.saveModal.style.display = 'none';
+  dom.loadModal.style.display = 'none';
+  dom.calcModal.style.display = 'none';
 }
 
 function renderSavedList() {
@@ -1306,18 +1306,7 @@ function bindEvents() {
     dom.btnExportObsidian.addEventListener('click', exportToObsidian);
   }
 
-  // Calculators
-  if (dom.btnCalculators) {
-    dom.btnCalculators.addEventListener('click', showCalculators);
-  }
-  if (dom.calcModalClose) {
-    dom.calcModalClose.addEventListener('click', hideCalculators);
-  }
-  if (dom.calcModalCancel) {
-    dom.calcModalCancel.addEventListener('click', hideCalculators);
-  }
-
-  // Calculator tabs
+  // Calculator tabs & basic calculator
   document.querySelectorAll('.calc-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       switchCalcTab(tab.dataset.calc);
@@ -1572,34 +1561,143 @@ function escapeMd(str) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   QUICK CALCULATORS
+   CALCULATORS (inline in right panel)
    ════════════════════════════════════════════════════════════════ */
 
-function showCalculators() {
-  dom.modalOverlay.classList.remove('modal-hidden');
-  dom.saveModal.style.display = 'none';
-  dom.loadModal.style.display = 'none';
-  dom.calcModal.style.display = 'flex';
-  // Trigger initial calculations
-  updateCalc('drywall');
-  updateCalc('concrete');
-  updateCalc('lumber');
-  updateCalc('paint');
-  updateCalc('flooring');
+/* ── Basic Arithmetic Calculator ── */
+
+let basicCalc = {
+  display: '0',
+  previousValue: null,
+  operation: null,
+  resetOnNextDigit: false,
+  justEvaluated: false,
+};
+
+function basicCalcInput(action) {
+  const display = document.getElementById('basic-calc-display');
+
+  if (action === 'ac') {
+    basicCalc = {
+      display: '0',
+      previousValue: null,
+      operation: null,
+      resetOnNextDigit: false,
+      justEvaluated: false,
+    };
+    display.textContent = '0';
+    return;
+  }
+
+  if (action === 'c') {
+    basicCalc.display = '0';
+    basicCalc.resetOnNextDigit = false;
+    display.textContent = '0';
+    return;
+  }
+
+  // Digit or decimal
+  if (action === 'decimal' || /^\d$/.test(action)) {
+    if (basicCalc.resetOnNextDigit) {
+      basicCalc.display = action === 'decimal' ? '0.' : action;
+      basicCalc.resetOnNextDigit = false;
+    } else {
+      if (action === 'decimal') {
+        if (basicCalc.display.includes('.')) return;
+        basicCalc.display += '.';
+      } else {
+        if (basicCalc.display === '0') {
+          basicCalc.display = action;
+        } else {
+          basicCalc.display += action;
+        }
+      }
+    }
+    basicCalc.justEvaluated = false;
+    display.textContent = basicCalc.display;
+    return;
+  }
+
+  // Negate
+  if (action === 'negate') {
+    if (basicCalc.display !== '0') {
+      basicCalc.display = basicCalc.display.startsWith('-')
+        ? basicCalc.display.slice(1)
+        : '-' + basicCalc.display;
+      display.textContent = basicCalc.display;
+    }
+    return;
+  }
+
+  // Percent
+  if (action === 'percent') {
+    const val = parseFloat(basicCalc.display) / 100;
+    basicCalc.display = String(val);
+    basicCalc.resetOnNextDigit = true;
+    display.textContent = val.toLocaleString(undefined, {maximumFractionDigits: 10});
+    return;
+  }
+
+  // Operation (+, -, ×, ÷)
+  if (['add', 'subtract', 'multiply', 'divide'].includes(action)) {
+    const current = parseFloat(basicCalc.display);
+    if (basicCalc.operation && !basicCalc.resetOnNextDigit && !basicCalc.justEvaluated) {
+      // Chain calculation
+      basicCalc.display = String(performCalc(basicCalc.previousValue, current, basicCalc.operation));
+      display.textContent = basicCalc.display;
+    }
+    basicCalc.previousValue = parseFloat(basicCalc.display);
+    basicCalc.operation = action;
+    basicCalc.resetOnNextDigit = true;
+    basicCalc.justEvaluated = false;
+    return;
+  }
+
+  // Equals
+  if (action === 'equals') {
+    const current = parseFloat(basicCalc.display);
+    if (basicCalc.operation && basicCalc.previousValue !== null) {
+      const result = performCalc(basicCalc.previousValue, current, basicCalc.operation);
+      basicCalc.display = String(result);
+      basicCalc.resetOnNextDigit = true;
+      basicCalc.justEvaluated = true;
+      display.textContent = result.toLocaleString(undefined, {maximumFractionDigits: 10});
+    }
+    return;
+  }
 }
 
-function hideCalculators() {
-  dom.calcModal.style.display = 'none';
-  dom.modalOverlay.classList.add('modal-hidden');
+function performCalc(a, b, op) {
+  switch (op) {
+    case 'add': return a + b;
+    case 'subtract': return a - b;
+    case 'multiply': return a * b;
+    case 'divide': return b !== 0 ? a / b : 0;
+    default: return b;
+  }
 }
+
+function initBasicCalc() {
+  document.querySelectorAll('.basic-calc-buttons .calc-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      basicCalcInput(btn.dataset.action);
+    });
+  });
+}
+
+/* ── Tab Switching ── */
 
 function switchCalcTab(name) {
   document.querySelectorAll('.calc-pane').forEach(p => p.style.display = 'none');
   document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(`calc-${name}`).style.display = 'block';
-  document.querySelector(`.calc-tab[data-calc="${name}"]`).classList.add('active');
-  updateCalc(name);
+  const pane = document.getElementById(`calc-${name}`);
+  if (pane) pane.style.display = 'block';
+  const tab = document.querySelector(`.calc-tab[data-calc="${name}"]`);
+  if (tab) tab.classList.add('active');
+  if (name !== 'basic') updateCalc(name);
 }
+
+/* ── Quick Construction Calculators ── */
 
 function updateCalc(type) {
   switch (type) {
@@ -1613,10 +1711,10 @@ function updateCalc(type) {
 
       const wallArea = 2 * (w + l) * h;
       const ceilingArea = w * l;
-      const openings = doors * 20; // ~20 sqft per door
+      const openings = doors * 20;
       const totalArea = (wallArea + ceilingArea - openings) * (1 + waste / 100);
       const sheets = Math.ceil(totalArea / sheetSize);
-      const cost = sheets * 15.98; // average drywall cost
+      const cost = sheets * 15.98;
 
       document.getElementById('calc-dw-result').innerHTML =
         `Sheets needed: <strong>${sheets}</strong> | Total cost: <strong>$${cost.toFixed(2)}</strong>`;
@@ -1628,8 +1726,8 @@ function updateCalc(type) {
       const cd = parseFloat(document.getElementById('calc-con-depth').value) || 0;
       const cubicFeet = cl * cw * (cd / 12);
       const cubicYards = cubicFeet / 27;
-      const bags80 = Math.ceil(cubicYards * 45); // ~45 80lb bags per yard
-      const cost = cubicYards * 150; // ~$150/yard delivered
+      const bags80 = Math.ceil(cubicYards * 45);
+      const cost = cubicYards * 150;
 
       document.getElementById('calc-con-result').innerHTML =
         `Cubic yards: <strong>${cubicYards.toFixed(2)}</strong> | 80lb bags: <strong>${bags80}</strong> | Total: <strong>$${cost.toFixed(2)}</strong>`;
@@ -1640,8 +1738,8 @@ function updateCalc(type) {
       const spacing = parseInt(document.getElementById('calc-lum-spacing').value) || 16;
       const walls = parseInt(document.getElementById('calc-lum-walls').value) || 1;
       const studs = Math.ceil((ll * 12 / spacing) + 1) * walls;
-      const plates = Math.ceil((ll * 3 / 8) * walls); // top + bottom + cap plate
-      const cost = (studs + plates) * 4.98; // ~$5 per 2x4
+      const plates = Math.ceil((ll * 3 / 8) * walls);
+      const cost = (studs + plates) * 4.98;
 
       document.getElementById('calc-lum-result').innerHTML =
         `Studs: <strong>${studs}</strong> | Plates: <strong>${plates}</strong> | Total cost: <strong>$${cost.toFixed(2)}</strong>`;
@@ -1659,8 +1757,8 @@ function updateCalc(type) {
       const ceilingArea = pw * pl;
       const subtract = (windows * 15) + (doors * 20);
       const totalArea = (wallArea + ceilingArea - subtract) * coats;
-      const gallons = Math.ceil(totalArea / 350); // 1 gal covers ~350 sqft
-      const cost = gallons * 32.98; // average paint cost
+      const gallons = Math.ceil(totalArea / 350);
+      const cost = gallons * 32.98;
 
       document.getElementById('calc-pt-result').innerHTML =
         `Gallons needed: <strong>${gallons}</strong> | Total cost: <strong>$${cost.toFixed(2)}</strong>`;
@@ -1687,7 +1785,6 @@ function addCalcResultToEstimate(type) {
     case 'drywall': {
       const sheets = parseInt(document.getElementById('calc-dw-result').textContent.match(/[\d.]+/)[0]);
       addItem('Drywall Sheets (calc)', 'Sheathing & Panels', sheets, 15.98, 'sheet');
-      hideCalculators();
       break;
     }
     case 'concrete': {
@@ -1696,7 +1793,6 @@ function addCalcResultToEstimate(type) {
         const yards = parseFloat(match[0]);
         addItem('Concrete (calc)', 'Concrete & Masonry', yards, 150, 'cu yd');
       }
-      hideCalculators();
       break;
     }
     case 'lumber': {
@@ -1705,7 +1801,6 @@ function addCalcResultToEstimate(type) {
         const studs = parseInt(match[0]);
         addItem('2x4x8 Studs (calc)', 'Lumber & Framing', studs, 4.98, 'ea');
       }
-      hideCalculators();
       break;
     }
     case 'paint': {
@@ -1714,7 +1809,6 @@ function addCalcResultToEstimate(type) {
         const gallons = parseInt(match[0]);
         addItem('Interior Paint (calc)', 'Paint & Finishes', gallons, 32.98, 'gal');
       }
-      hideCalculators();
       break;
     }
     case 'flooring': {
@@ -1725,7 +1819,6 @@ function addCalcResultToEstimate(type) {
         const sqft = parseFloat(match[0]);
         addItem(`${name} (calc)`, 'Flooring', sqft, price, 'sqft');
       }
-      hideCalculators();
       break;
     }
   }
@@ -1797,6 +1890,13 @@ async function init() {
   setupCodeSearch();
   bindEvents();
   syncStateToUI();
+  initBasicCalc();
+  // Run initial calc updates so tabs show values right away
+  updateCalc('drywall');
+  updateCalc('concrete');
+  updateCalc('lumber');
+  updateCalc('paint');
+  updateCalc('flooring');
   // Start particle background
   const bg = new ParticleBackground('bg-canvas');
   showToast('◈ Estimate Engine ready', 'info');
